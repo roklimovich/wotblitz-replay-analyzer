@@ -1,4 +1,4 @@
-# WoT Blitz Replay Stats
+# WoT Blitz Replay Analyzer
 
 A Python tool that parses World of Tanks Blitz replay files and generates an Excel spreadsheet with per-player performance statistics and BPR 2.0 ratings for your team.
 
