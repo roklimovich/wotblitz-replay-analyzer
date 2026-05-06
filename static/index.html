@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PERFORMANCE STATS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121212;--sf:#1F1F1F;--sf2:#242424;--sf3:#2A2A2A;
+  --br:#313131;--br2:#3D3D3D;
+  --or:#FF5500;--or2:#FF6D1A;--or-dim:rgba(255,85,0,.1);
+  --tx:#FFFFFF;--tx2:#9E9E9E;--tx3:#5C5C5C;
+  --gn:#1FD655;--rd:#FF4040;--bl:#4B8EF5;--yw:#FFB800;
+  --nav:232px;--r:6px;--rs:4px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOP NAV ── */
+.topnav{height:56px;background:var(--sf);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;margin-right:28px;text-decoration:none;flex-shrink:0}
+.logo-hex{width:28px;height:28px;background:var(--or);clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:flex;align-items:center;justify-content:center}
+.logo-name{font-size:15px;font-weight:700;letter-spacing:.3px;color:var(--tx)}
+.nav-tabs{display:flex;align-items:center;gap:2px;flex:1}
+.nav-tab{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--tx2);text-decoration:none;transition:all .12s;cursor:pointer;border:none;background:none;white-space:nowrap}
+.nav-tab:hover{color:var(--tx);background:var(--sf2)}
+.nav-tab.active{color:var(--tx)}
+.nav-tab.dim{opacity:.35;pointer-events:none}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;min-height:0;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--nav);background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;padding:12px 8px;gap:2px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sb-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--tx3);padding:10px 10px 4px;margin-top:4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .12s;border:none;background:none;width:100%;text-align:left}
+.sb-item:hover{color:var(--tx);background:var(--sf2)}
+.sb-item.active{color:var(--tx);background:var(--sf3)}
+.sb-item.active .sb-ico{color:var(--or)}
+.sb-item.dim{opacity:.35;pointer-events:none}
+.sb-ico{color:var(--tx3);flex-shrink:0;transition:color .12s}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0}
+.btn-or{background:var(--or);color:#fff}
+.btn-or:hover{background:var(--or2)}
+.btn-or:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--tx2);border:1px solid var(--br)}
+.btn-ghost:hover{color:var(--tx);border-color:var(--br2);background:var(--sf2)}
+.btn-upload{background:var(--sf3);color:var(--tx2);border:1px solid var(--br)}
+.btn-upload:hover{color:var(--tx);border-color:var(--or);background:var(--or-dim)}
+.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+#fileInput{display:none}
+
+/* ── CONTENT ── */
+.content{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto}
+
+/* ── PAGE HEADER ── */
+.page-hdr{background:var(--sf);border-bottom:1px solid var(--br);padding:22px 28px 20px;flex-shrink:0}
+.eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--or);margin-bottom:3px}
+.page-title{font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.3px}
+.page-sub{font-size:13px;color:var(--tx2);margin-top:3px;margin-bottom:18px}
+
+.import-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.f-input{background:var(--bg);border:1px solid var(--br);border-radius:var(--rs);color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;padding:9px 13px;outline:none;transition:border-color .15s;min-width:0}
+.f-input:focus{border-color:var(--or)}
+.f-input::placeholder{color:var(--tx3)}
+.f-input-wide{flex:1;min-width:260px}
+
+.sep{color:var(--tx3);font-size:12px;font-weight:500;flex-shrink:0}
+
+/* stats strip */
+.strip{display:none;gap:32px;border-top:1px solid var(--br);margin-top:20px;padding-top:18px;flex-wrap:wrap}
+.sp-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:2px}
+.sp-val{font-size:19px;font-weight:700;color:var(--tx);line-height:1}
+.sp-val.ac{color:var(--or)}
+
+/* ── SECTION TABS ── */
+.sec-tabs{display:none;align-items:center;gap:0;padding:0 28px;background:var(--sf);border-bottom:1px solid var(--br);flex-shrink:0}
+.sec-tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px}
+.sec-tab:hover{color:var(--tx)}
+.sec-tab.active{color:var(--tx);border-bottom-color:var(--or)}
+
+/* ── OVERVIEW SECTION ── */
+.section{display:none;padding:24px 28px 32px;flex:1}
+.section.visible{display:block}
+
+/* ── MATCH OVERVIEW (two-team side by side) ── */
+.match-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:start;margin-bottom:28px}
+.team-side{}
+.team-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r) var(--r) 0 0;border-bottom:none}
+.team-label-our{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--or)}
+.team-label-enemy{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3)}
+.team-avg-bpr{font-size:12px;font-weight:600;color:var(--tx2)}
+.team-avg-bpr span{color:var(--tx);font-weight:700}
+
+.vs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;min-width:56px;padding-top:52px}
+.vs-badge{width:36px;height:36px;background:var(--sf2);border:1px solid var(--br);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.5px}
+
+/* overview player card */
+.ov-list{background:var(--sf);border:1px solid var(--br);border-radius:0 0 var(--r) var(--r)}
+.ov-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--br);transition:background .1s}
+.ov-row:last-child{border-bottom:none}
+.ov-row:hover{background:rgba(255,255,255,.025)}
+.ov-rank{font-size:11px;font-weight:700;color:var(--tx3);width:20px;text-align:center;flex-shrink:0}
+.ov-rank.r1{color:#FFD700}.ov-rank.r2{color:#B0B0B0}.ov-rank.r3{color:#CD7F32}
+.ov-avatar{width:28px;height:28px;border-radius:50%;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--tx3);border:1px solid var(--br);text-transform:uppercase;flex-shrink:0}
+.ov-info{flex:1;min-width:0}
+.ov-name{font-size:13px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-tank{font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.ov-stats{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.ov-bpr{display:flex;align-items:center;gap:6px}
+.ov-hex{width:20px;height:20px;clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ov-hex.elite{background:var(--or)}.ov-hex.high{background:var(--bl)}.ov-hex.mid{background:var(--yw)}.ov-hex.low{background:var(--sf3)}
+.ov-bpr-val{font-size:13px;font-weight:700;color:var(--tx)}
+.ov-adr{font-size:11px;color:var(--tx3)}
+
+/* ── TOOLBAR ── */
+.toolbar{display:none;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid var(--br);gap:10px;flex-wrap:wrap;background:var(--sf);flex-shrink:0}
+.toolbar-l{display:flex;align-items:center;gap:8px}
+.search-wrap{position:relative}
+.s-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none}
+.search-inp{background:var(--bg);border:1px solid var(--br);border-radius:var(--rs);color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;padding:7px 12px 7px 33px;outline:none;transition:border-color .15s;width:210px}
+.search-inp:focus{border-color:var(--or)}
+.search-inp::placeholder{color:var(--tx3)}
+.cnt-lbl{font-size:12px;color:var(--tx3)}
+.dd-wrap{position:relative}
+.dd-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r);padding:6px;z-index:50;min-width:190px;max-height:320px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.dd-menu.open{display:block}
+.dd-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--tx2);transition:background .1s}
+.dd-row:hover{background:var(--sf3);color:var(--tx)}
+.dd-row input{accent-color:var(--or);cursor:pointer;width:14px;height:14px}
+
+/* ── DETAIL TABLE ── */
+.table-area{display:none;padding:20px 28px 32px}
+.table-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+thead{background:var(--sf2);border-bottom:1px solid var(--br)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);cursor:pointer;user-select:none;transition:color .12s;white-space:nowrap}
+th:hover{color:var(--tx2)}
+th.sorted{color:var(--or)}
+.sarr{margin-left:4px;font-size:10px;opacity:.45}
+th.sorted .sarr{opacity:1}
+tbody tr{border-bottom:1px solid var(--br);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
+
+.td-rank{font-size:12px;font-weight:700;color:var(--tx3);width:36px;text-align:center}
+.r1{color:#FFD700!important}.r2{color:#B0B0B0!important}.r3{color:#CD7F32!important}
+
+.player-cell{display:flex;align-items:center;gap:10px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--tx3);flex-shrink:0;border:1px solid var(--br);text-transform:uppercase}
+.pname{font-size:13px;font-weight:600;color:var(--tx)}
+
+.bpr-cell{display:flex;align-items:center;gap:8px}
+.bpr-hex{width:26px;height:26px;clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bpr-hex.elite{background:var(--or)}.bpr-hex.high{background:var(--bl)}.bpr-hex.mid{background:var(--yw)}.bpr-hex.low{background:var(--sf3)}
+.bpr-v{font-size:14px;font-weight:700;color:var(--tx)}
+
+.td-n{font-size:13px;font-weight:500;color:var(--tx)}
+.td-m{font-size:13px;color:var(--tx2)}
+.tank-tag{display:inline-flex;align-items:center;background:var(--sf3);border:1px solid var(--br);border-radius:3px;padding:3px 8px;font-size:11px;font-weight:500;color:var(--tx2);max-width:155px;overflow:hidden;text-overflow:ellipsis}
+.type-n{font-size:13px;font-weight:700;min-width:24px;display:inline-block;text-align:center}
+.c-ht{color:var(--rd)}.c-mt{color:var(--bl)}.c-lt{color:var(--gn)}.c-td{color:var(--yw)}.c-zero{color:var(--tx3)!important}
+.acc-cell{display:flex;align-items:center;gap:8px}
+.acc-bg{width:50px;height:3px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.acc-fill{height:100%;background:var(--or);border-radius:2px}
+.acc-v{font-size:12px;font-weight:600;color:var(--tx);min-width:34px}
+
+/* empty */
+.empty-state{padding:72px 24px;text-align:center;color:var(--tx3)}
+.empty-ico{width:52px;height:52px;background:var(--sf2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:1px solid var(--br)}
+.empty-t{font-size:15px;font-weight:600;color:var(--tx2);margin-bottom:5px}
+.empty-s{font-size:13px}
+
+/* err panel */
+.err-panel{display:none;margin:14px 28px 0;background:rgba(255,64,64,.06);border:1px solid rgba(255,64,64,.2);border-radius:var(--r);padding:11px 15px}
+.err-panel.show{display:block}
+.err-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--rd);margin-bottom:5px}
+.err-list{font-size:12px;color:var(--tx3);line-height:1.9;max-height:68px;overflow-y:auto}
+
+/* loading */
+.veil{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(3px)}
+.veil.on{display:flex}
+.spinner{width:38px;height:38px;border:3px solid var(--br);border-top-color:var(--or);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-lbl{font-size:13px;font-weight:500;color:var(--tx2);letter-spacing:.3px}
+
+/* toasts */
+.toasts{position:fixed;bottom:20px;right:20px;z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{position:relative;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r);padding:11px 16px 11px 20px;font-size:13px;color:var(--tx);max-width:300px;box-shadow:0 4px 16px rgba(0,0,0,.4);animation:tin .18s ease;display:flex;align-items:center;gap:9px}
+.toast::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:4px 0 0 4px}
+.toast.ok::before{background:var(--gn)}.toast.err::before{background:var(--rd)}.toast.inf::before{background:var(--or)}
+@keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* upload progress bar */
+.upload-prog{display:none;height:2px;background:var(--br);position:fixed;top:56px;left:0;right:0;z-index:300}
+.upload-prog-fill{height:100%;background:var(--or);width:0%;transition:width .2s}
+.upload-prog.show{display:block}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--br);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--br2)}
+</style>
+</head>
+<body>
+
+<div class="veil" id="veil"><div class="spinner"></div><div class="spin-lbl" id="veilMsg">Processing replays…</div></div>
+<div class="upload-prog" id="upProg"><div class="upload-prog-fill" id="upFill"></div></div>
+<div class="toasts" id="toasts"></div>
+<input type="file" id="fileInput" multiple accept=".wotbreplay" webkitdirectory/>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <a class="logo" href="#">
+    <div class="logo-hex"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <span class="logo-name">PERFORMANCE STATS</span>
+  </a>
+  <div class="nav-tabs">
+    <a class="nav-tab active" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </a>
+    <a class="nav-tab dim" href="#">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Analytics
+    </a>
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-ghost" id="btnExport" disabled onclick="exportXlsx()" style="font-size:12px;padding:7px 14px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export Excel
+    </button>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-lbl">Session</div>
+    <button class="sb-item active" onclick="switchSection('overview')">
+      <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+      Overview
+    </button>
+    <button class="sb-item dim" id="sbOurTeam" onclick="switchSection('our')">
+      <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
+      Our Team
+    </button>
+    <button class="sb-item dim" id="sbEnemyTeam" onclick="switchSection('enemy')">
+      <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+      Enemy Team
+    </button>
+    <div class="sb-lbl">Tools</div>
+    <button class="sb-item dim">
+      <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></span>
+      Settings
+    </button>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content" id="contentArea">
+
+    <!-- PAGE HEADER -->
+    <div class="page-hdr">
+      <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
+      <div class="page-title">Team Statistics</div>
+      <div class="page-sub">Paste a folder path or upload replay files directly from your machine</div>
+
+      <div class="import-row">
+        <input class="f-input f-input-wide" id="folderInput" type="text"
+          placeholder="D:\World of Tanks Blitz\replays\2026-03-18"
+          onkeydown="if(event.key==='Enter')generatePath()"/>
+        <button class="btn btn-or" onclick="generatePath()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Generate
+        </button>
+        <span class="sep">or</span>
+        <button class="btn btn-upload" onclick="document.getElementById('fileInput').click()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Folder
+        </button>
+        <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+      </div>
+
+      <div class="strip" id="strip">
+        <div><div class="sp-lbl">Replays</div><div class="sp-val" id="sReplays">—</div></div>
+        <div><div class="sp-lbl">Our Players</div><div class="sp-val" id="sOurPlayers">—</div></div>
+        <div><div class="sp-lbl">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">—</div></div>
+        <div><div class="sp-lbl">Our Avg BPR</div><div class="sp-val ac" id="sOurBpr">—</div></div>
+        <div><div class="sp-lbl">Enemy Avg BPR</div><div class="sp-val" id="sEnemyBpr">—</div></div>
+        <div><div class="sp-lbl">Our Best</div><div class="sp-val ac" id="sOurBest">—</div></div>
+        <div><div class="sp-lbl">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">—</div></div>
+      </div>
+    </div>
+
+    <!-- ERROR PANEL -->
+    <div class="err-panel" id="errPanel">
+      <div class="err-title">⚠ Failed to parse</div>
+      <div class="err-list" id="errList"></div>
+    </div>
+
+    <!-- SECTION TABS -->
+    <div class="sec-tabs" id="secTabs">
+      <button class="sec-tab active" id="tabOverview" onclick="switchSection('overview')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Match Overview
+      </button>
+      <button class="sec-tab" id="tabOur" onclick="switchSection('our')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Our Team
+      </button>
+      <button class="sec-tab" id="tabEnemy" onclick="switchSection('enemy')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Enemy Team
+      </button>
+    </div>
+
+    <!-- ── OVERVIEW SECTION ── -->
+    <div class="section" id="secOverview">
+      <div class="match-wrap">
+        <!-- OUR TEAM -->
+        <div class="team-side">
+          <div class="team-header">
+            <span class="team-label-our">Our Team</span>
+            <span class="team-avg-bpr">Avg BPR <span id="ovOurAvg">—</span></span>
+          </div>
+          <div class="ov-list" id="ovOurList"></div>
+        </div>
+
+        <!-- VS -->
+        <div class="vs-col">
+          <div class="vs-badge">VS</div>
+        </div>
+
+        <!-- ENEMY TEAM -->
+        <div class="team-side">
+          <div class="team-header">
+            <span class="team-label-enemy">Enemy Team</span>
+            <span class="team-avg-bpr">Avg BPR <span id="ovEnemyAvg">—</span></span>
+          </div>
+          <div class="ov-list" id="ovEnemyList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OUR TEAM TABLE SECTION ── -->
+    <div class="toolbar" id="toolbarOur">
+      <div class="toolbar-l">
+        <div class="search-wrap">
+          <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-inp" id="searchOur" placeholder="Search player…" oninput="renderTable('our')"/>
+        </div>
+        <div class="dd-wrap" id="ddOurWrap">
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('our')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+            Columns
+          </button>
+          <div class="dd-menu" id="ddOurMenu"></div>
+        </div>
+      </div>
+      <span class="cnt-lbl" id="cntOur"></span>
+    </div>
+    <div class="table-area" id="taOur">
+      <div class="table-card">
+        <table><thead id="thOur"></thead><tbody id="tbOur"></tbody></table>
+        <div class="empty-state" id="emptyOur" style="display:none">
+          <div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--tx3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="empty-t">No players found</div><div class="empty-s">Try a different search</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ENEMY TEAM TABLE SECTION ── -->
+    <div class="toolbar" id="toolbarEnemy">
+      <div class="toolbar-l">
+        <div class="search-wrap">
+          <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-inp" id="searchEnemy" placeholder="Search player…" oninput="renderTable('enemy')"/>
+        </div>
+        <div class="dd-wrap" id="ddEnemyWrap">
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('enemy')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+            Columns
+          </button>
+          <div class="dd-menu" id="ddEnemyMenu"></div>
+        </div>
+      </div>
+      <span class="cnt-lbl" id="cntEnemy"></span>
+    </div>
+    <div class="table-area" id="taEnemy">
+      <div class="table-card">
+        <table><thead id="thEnemy"></thead><tbody id="tbEnemy"></tbody></table>
+        <div class="empty-state" id="emptyEnemy" style="display:none">
+          <div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--tx3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <div class="empty-t">No players found</div><div class="empty-s">Try a different search</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<script>
+const API = 'http://localhost:5000';
+
+const COLS = [
+  {k:'_rank',     h:'#',         vis:true,  fmt:'rank'},
+  {k:'nickname',  h:'Player',    vis:true,  fmt:'player'},
+  {k:'BPR',       h:'BPR 2.0',  vis:true,  fmt:'bpr'},
+  {k:'battles',   h:'Battles',   vis:true,  fmt:'n'},
+  {k:'main_tank', h:'Main Tank', vis:true,  fmt:'tank'},
+  {k:'HT',        h:'HT',        vis:true,  fmt:'ht'},
+  {k:'MT',        h:'MT',        vis:true,  fmt:'mt'},
+  {k:'LT',        h:'LT',        vis:true,  fmt:'lt'},
+  {k:'TD',        h:'TD',        vis:true,  fmt:'td'},
+  {k:'ADR',       h:'ADR',       vis:true,  fmt:'n'},
+  {k:'KPR',       h:'KPR',       vis:true,  fmt:'n'},
+  {k:'frags',     h:'Frags',     vis:true,  fmt:'n'},
+  {k:'DE',        h:'DE',        vis:true,  fmt:'n'},
+  {k:'assist',    h:'Assist',    vis:true,  fmt:'n'},
+  {k:'blocked',   h:'Blocked',   vis:true,  fmt:'n'},
+  {k:'AccH',      h:'AccH %',    vis:true,  fmt:'acc'},
+  {k:'AccP',      h:'AccP %',    vis:true,  fmt:'acc'},
+  {k:'Firepower', h:'Firepower', vis:true,  fmt:'n'},
+  {k:'AIM',       h:'AIM',       vis:true,  fmt:'n'},
+  {k:'Support',   h:'Support',   vis:true,  fmt:'n'},
+  {k:'Supremacy', h:'Supremacy', vis:true,  fmt:'n'},
+  {k:'iPoints',   h:'iPoints',   vis:false, fmt:'n'},
+  {k:'sPoints',   h:'sPoints',   vis:false, fmt:'n'},
+  {k:'shots',     h:'Shots',     vis:false, fmt:'n'},
+  {k:'hits',      h:'Hits',      vis:false, fmt:'n'},
+  {k:'pens',      h:'Pens',      vis:false, fmt:'n'},
+  {k:'account_id',h:'Account ID',vis:false, fmt:'m'},
+];
+
+// deep clone cols for each team so they can have independent visibility
+const COLS_OUR   = COLS.map(c=>({...c}));
+const COLS_ENEMY = COLS.map(c=>({...c}));
+
+let ourData   = [];
+let enemyData = [];
+let sortState = {
+  our:   {k:'BPR', a:false},
+  enemy: {k:'BPR', a:false},
+};
+let curSection = 'overview';
+
+// ── File input (folder upload) ─────────────────────────────
+document.getElementById('fileInput').addEventListener('change', async e => {
+  const files = [...e.target.files].filter(f => f.name.endsWith('.wotbreplay'));
+  if (!files.length) { toast('No .wotbreplay files found in selected folder','err'); return; }
+
+  setVeil(true, `Uploading ${files.length} replays…`);
+
+  const fd = new FormData();
+  files.forEach(f => fd.append('files', f, f.name));
+
+  // show progress bar
+  const prog = document.getElementById('upProg');
+  const fill = document.getElementById('upFill');
+  prog.classList.add('show');
+
+  try {
+    // simulate upload progress via XHR so we get progress events
+    const json = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API}/api/upload`);
+      xhr.upload.onprogress = ev => {
+        if (ev.lengthComputable) fill.style.width = (ev.loaded / ev.total * 100) + '%';
+      };
+      xhr.onload = () => {
+        fill.style.width = '100%';
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch { reject(new Error('Bad response')); }
+      };
+      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.send(fd);
+    });
+
+    if (json.error) { toast(json.error, 'err'); return; }
+    applyResults(json);
+    toast(`${ourData.length + enemyData.length} players loaded from ${json.processed} replays`, 'ok');
+  } catch(e) {
+    toast('Upload error: ' + e.message, 'err');
+  } finally {
+    setVeil(false);
+    setTimeout(() => { prog.classList.remove('show'); fill.style.width='0%'; }, 600);
+    e.target.value = ''; // reset so same folder can be re-uploaded
+  }
+});
+
+// ── Generate from path ─────────────────────────────────────
+async function generatePath() {
+  const folder = document.getElementById('folderInput').value.trim();
+  if (!folder) { toast('Enter a folder path','err'); return; }
+  setVeil(true, 'Processing replays…');
+  try {
+    const r = await fetch(`${API}/api/process`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({folder})
+    });
+    const j = await r.json();
+    if (!r.ok) { toast(j.error || 'Server error','err'); return; }
+    applyResults(j);
+    toast(`${ourData.length + enemyData.length} players loaded from ${j.processed} replays`,'ok');
+  } catch(e) {
+    toast('Cannot reach backend. Is app.py running?','err');
+  } finally { setVeil(false); }
+}
+
+// ── Apply JSON results ─────────────────────────────────────
+function applyResults(j) {
+  ourData   = j.our_team   || [];
+  enemyData = j.enemy_team || [];
+
+  // summary strip
+  document.getElementById('strip').style.display = 'flex';
+  set('sReplays',      j.processed);
+  set('sOurPlayers',   ourData.length);
+  set('sEnemyPlayers', enemyData.length);
+  set('sOurBpr',       avgF(ourData,   'BPR'));
+  set('sEnemyBpr',     avgF(enemyData, 'BPR'));
+  set('sOurBest',      ourData[0]?.nickname ?? '—');
+  set('sErr',          j.errors?.length || 0);
+
+  if (j.errors?.length) {
+    document.getElementById('errPanel').classList.add('show');
+    document.getElementById('errList').textContent = j.errors.join('\n');
+  }
+
+  // unlock sidebar items
+  document.getElementById('sbOurTeam').classList.remove('dim');
+  document.getElementById('sbEnemyTeam').classList.remove('dim');
+  document.getElementById('secTabs').style.display = 'flex';
+  document.getElementById('btnExport').disabled = false;
+
+  buildDD('our');
+  buildDD('enemy');
+  renderOverview();
+  switchSection('overview');
+}
+
+// ── Section switching ──────────────────────────────────────
+function switchSection(sec) {
+  curSection = sec;
+
+  // sidebar
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  const sbMap = {overview: 0, our: 1, enemy: 2};
+  document.querySelectorAll('.sb-item')[sbMap[sec]]?.classList.add('active');
+
+  // tabs
+  ['tabOverview','tabOur','tabEnemy'].forEach(id => document.getElementById(id).classList.remove('active'));
+  const tabMap = {overview:'tabOverview', our:'tabOur', enemy:'tabEnemy'};
+  document.getElementById(tabMap[sec]).classList.add('active');
+
+  // panels
+  document.getElementById('secOverview').style.display  = sec==='overview' ? 'block'  : 'none';
+  document.getElementById('toolbarOur').style.display   = sec==='our'      ? 'flex'   : 'none';
+  document.getElementById('taOur').style.display        = sec==='our'      ? 'block'  : 'none';
+  document.getElementById('toolbarEnemy').style.display = sec==='enemy'    ? 'flex'   : 'none';
+  document.getElementById('taEnemy').style.display      = sec==='enemy'    ? 'block'  : 'none';
+
+  if (sec === 'our')   renderTable('our');
+  if (sec === 'enemy') renderTable('enemy');
+}
+
+// ── Overview (two-team cards, BPR+ADR sorted) ─────────────
+function renderOverview() {
+  const sorted_our   = bprAdrSort([...ourData]);
+  const sorted_enemy = bprAdrSort([...enemyData]);
+
+  set('ovOurAvg',   avgF(ourData,   'BPR'));
+  set('ovEnemyAvg', avgF(enemyData, 'BPR'));
+
+  document.getElementById('ovOurList').innerHTML   = sorted_our.map((p,i)   => ovRow(p, i+1)).join('');
+  document.getElementById('ovEnemyList').innerHTML = sorted_enemy.map((p,i) => ovRow(p, i+1)).join('');
+  document.getElementById('secOverview').style.display = 'block';
+}
+
+function ovRow(p, rank) {
+  const in2 = String(p.nickname||'?').slice(0,2).toUpperCase();
+  const cls  = bprClass(p.BPR);
+  const rkCls = rank<=3 ? `r${rank}` : '';
+  return `<div class="ov-row">
+    <span class="ov-rank ${rkCls}">${rank}</span>
+    <div class="ov-avatar">${esc(in2)}</div>
+    <div class="ov-info">
+      <div class="ov-name">${esc(p.nickname)}</div>
+      <div class="ov-tank">${esc(p.main_tank)}</div>
+    </div>
+    <div class="ov-stats">
+      <div class="ov-bpr">
+        <div class="ov-hex ${cls}">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="ov-bpr-val">${p.BPR}</span>
+      </div>
+      <div class="ov-adr">ADR ${p.ADR}</div>
+    </div>
+  </div>`;
+}
+
+// ── Detail table ───────────────────────────────────────────
+function renderTable(team) {
+  const data    = team==='our' ? ourData : enemyData;
+  const cols    = team==='our' ? COLS_OUR : COLS_ENEMY;
+  const ss      = sortState[team];
+  const vc      = cols.filter(c=>c.vis);
+  const q       = document.getElementById(team==='our'?'searchOur':'searchEnemy').value.toLowerCase();
+  const thEl    = document.getElementById(team==='our'?'thOur':'thEnemy');
+  const tbEl    = document.getElementById(team==='our'?'tbOur':'tbEnemy');
+  const emEl    = document.getElementById(team==='our'?'emptyOur':'emptyEnemy');
+  const cntEl   = document.getElementById(team==='our'?'cntOur':'cntEnemy');
+
+  // rank by BPR+ADR always
+  const ranked = bprAdrSort([...data]);
+  const rankMap = {};
+  ranked.forEach((p,i) => rankMap[p.account_id] = i+1);
+
+  let rows = data.filter(p => !q || p.nickname.toLowerCase().includes(q));
+  rows.sort((a,b) => {
+    let av = a[ss.k]??0, bv = b[ss.k]??0;
+    if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}
+    return ss.a ? (av>bv?1:-1) : (av<bv?1:-1);
+  });
+
+  thEl.innerHTML = `<tr>${vc.map(c=>`
+    <th class="${ss.k===c.k?'sorted':''}" onclick="doSort('${team}','${c.k}')">
+      ${c.h}<span class="sarr">${ss.k===c.k?(ss.a?'↑':'↓'):'↕'}</span>
+    </th>`).join('')}</tr>`;
+
+  if (!rows.length) {
+    tbEl.innerHTML = '';
+    emEl.style.display = 'block';
+    cntEl.textContent = '0 players';
+    return;
+  }
+  emEl.style.display = 'none';
+  cntEl.textContent = `${rows.length} player${rows.length!==1?'s':''}`;
+  tbEl.innerHTML = rows.map(p => `<tr>${vc.map(c=>`<td>${cell(c,p,rankMap[p.account_id])}</td>`).join('')}</tr>`).join('');
+}
+
+function doSort(team, k) {
+  const ss = sortState[team];
+  ss.k===k ? ss.a=!ss.a : (ss.k=k, ss.a=false);
+  renderTable(team);
+}
+
+// ── Cell renderer ──────────────────────────────────────────
+function cell(c, p, rank) {
+  const v = c.k==='_rank' ? rank : p[c.k];
+  switch(c.fmt) {
+    case 'rank': return `<div class="td-rank ${rank<=3?'r'+rank:''}">${rank}</div>`;
+    case 'player': {
+      const in2 = String(p.nickname||'?').slice(0,2).toUpperCase();
+      return `<div class="player-cell"><div class="avatar">${esc(in2)}</div><span class="pname">${esc(p.nickname)}</span></div>`;
+    }
+    case 'bpr': return `<div class="bpr-cell">
+      <div class="bpr-hex ${bprClass(v)}"><svg width="10" height="10" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <span class="bpr-v">${v}</span></div>`;
+    case 'tank': return `<span class="tank-tag" title="${esc(v)}">${esc(v)}</span>`;
+    case 'ht': return `<span class="type-n c-ht${!v?' c-zero':''}">${v}</span>`;
+    case 'mt': return `<span class="type-n c-mt${!v?' c-zero':''}">${v}</span>`;
+    case 'lt': return `<span class="type-n c-lt${!v?' c-zero':''}">${v}</span>`;
+    case 'td': return `<span class="type-n c-td${!v?' c-zero':''}">${v}</span>`;
+    case 'acc': {
+      const pct = Math.min(100,v||0);
+      return `<div class="acc-cell"><div class="acc-bg"><div class="acc-fill" style="width:${pct}%"></div></div><span class="acc-v">${v}%</span></div>`;
+    }
+    case 'm': return `<span class="td-m">${v??'—'}</span>`;
+    default:  return `<span class="td-n">${v??'—'}</span>`;
+  }
+}
+
+// ── Column dropdown ────────────────────────────────────────
+function buildDD(team) {
+  const cols = team==='our' ? COLS_OUR : COLS_ENEMY;
+  const id   = team==='our' ? 'ddOurMenu' : 'ddEnemyMenu';
+  document.getElementById(id).innerHTML = cols
+    .filter(c=>c.k!=='_rank')
+    .map(c=>`<label class="dd-row"><input type="checkbox" ${c.vis?'checked':''} onchange="toggleCol('${team}','${c.k}',this.checked)"/>${c.h}</label>`)
+    .join('');
+}
+function toggleCol(team,k,v){
+  const cols = team==='our' ? COLS_OUR : COLS_ENEMY;
+  const col  = cols.find(c=>c.k===k);
+  if(col){col.vis=v; renderTable(team);}
+}
+function toggleDD(team){
+  document.getElementById(team==='our'?'ddOurMenu':'ddEnemyMenu').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  ['ddOurWrap','ddEnemyWrap'].forEach(id => {
+    const w = document.getElementById(id);
+    const m = document.getElementById(id.replace('Wrap','Menu'));
+    if(w && m && !w.contains(e.target)) m.classList.remove('open');
+  });
+});
+
+// ── Export ─────────────────────────────────────────────────
+async function exportXlsx() {
+  if (!ourData.length && !enemyData.length) return;
+  setVeil(true, 'Generating Excel…');
+  try {
+    const r = await fetch(`${API}/api/export`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({our_team: ourData, enemy_team: enemyData})
+    });
+    if (!r.ok) { toast('Export failed','err'); return; }
+    const blob = await r.blob();
+    const url  = URL.createObjectURL(blob);
+    Object.assign(document.createElement('a'),{href:url,download:'results.xlsx'}).click();
+    URL.revokeObjectURL(url);
+    toast('Excel exported — two sheets: Our Team + Enemy Team','ok');
+  } catch(e) { toast('Export error: '+e.message,'err'); }
+  finally { setVeil(false); }
+}
+
+// ── Clear ──────────────────────────────────────────────────
+function clearAll() {
+  ourData=[]; enemyData=[];
+  document.getElementById('strip').style.display='none';
+  document.getElementById('secTabs').style.display='none';
+  document.getElementById('secOverview').style.display='none';
+  document.getElementById('toolbarOur').style.display='none';
+  document.getElementById('taOur').style.display='none';
+  document.getElementById('toolbarEnemy').style.display='none';
+  document.getElementById('taEnemy').style.display='none';
+  document.getElementById('errPanel').classList.remove('show');
+  document.getElementById('btnExport').disabled=true;
+  document.getElementById('sbOurTeam').classList.add('dim');
+  document.getElementById('sbEnemyTeam').classList.add('dim');
+  ['searchOur','searchEnemy','folderInput'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ── Helpers ────────────────────────────────────────────────
+function bprAdrSort(arr) {
+  return arr.sort((a,b) => b.BPR!==a.BPR ? b.BPR-a.BPR : b.ADR-a.ADR);
+}
+function bprClass(v) { return v>=1.1?'elite':v>=0.9?'high':v>=0.7?'mid':'low'; }
+function avgF(arr,k){ return arr.length?(arr.reduce((s,p)=>s+(p[k]||0),0)/arr.length).toFixed(2):'—'; }
+function set(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
+function setVeil(v,msg='Processing…'){ document.getElementById('veil').classList.toggle('on',v); document.getElementById('veilMsg').textContent=msg; }
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function toast(msg, type='inf') {
+  const ico={
+    ok:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gn)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`,
+    err:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--rd)" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+    inf:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--or)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  };
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=(ico[type]||'')+esc(msg);
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),3800);
+}
+</script>
+</body>
+</html>
