@@ -85,7 +85,7 @@ This creates `tank_db.json` locally. Re-run it whenever new tanks are added to t
 ### 5. Run the main script
 
 ```bash
-python main.py
+python blitz_stats.py
 ```
 
 The output file `results.xlsx` will be saved inside your `REPLAY_FOLDER`.
