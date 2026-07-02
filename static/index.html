@@ -1,9 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>PERFORMANCE STATS</title>
+<title>BlitzScrim · WoT Blitz Replay Analyzer</title>
+<meta name="description" content="Analyze World of Tanks Blitz replay sessions with team stats, BPR ratings, charts and Excel exports."/>
+<meta name="theme-color" content="#FF5500"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://blitzscrim.sneeko.fr/"/>
+<meta property="og:title" content="BlitzScrim"/>
+<meta property="og:description" content="WoT Blitz replay sessions, team stats, BPR ratings and clean exports."/>
+<meta property="og:image" content="https://blitzscrim.sneeko.fr/static/social-preview.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="BlitzScrim"/>
+<meta name="twitter:description" content="WoT Blitz replay sessions, team stats, BPR ratings and clean exports."/>
+<meta name="twitter:image" content="https://blitzscrim.sneeko.fr/static/social-preview.png"/>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -19,7 +33,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh}
 
-/* ── TOP NAV ── */
+/* â”€â”€ TOP NAV â”€â”€ */
 .topnav{height:56px;background:var(--sf);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;flex-shrink:0}
 .logo{display:flex;align-items:center;gap:10px;margin-right:28px;text-decoration:none;flex-shrink:0}
 .logo-hex{width:28px;height:28px;background:var(--or);clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:flex;align-items:center;justify-content:center}
@@ -30,21 +44,77 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .nav-tab.active{color:var(--tx)}
 .nav-tab.dim{opacity:.35;pointer-events:none}
 .nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+#btnExport{display:none!important}
+.sys-pill{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--br);border-radius:var(--rs);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:600}
+.sys-dot{width:7px;height:7px;border-radius:50%;background:var(--yw);box-shadow:0 0 0 3px rgba(255,184,0,.12)}
+.sys-pill.ok .sys-dot{background:var(--gn);box-shadow:0 0 0 3px rgba(31,214,85,.12)}
+.sys-pill.err .sys-dot{background:var(--rd);box-shadow:0 0 0 3px rgba(255,64,64,.12)}
 
-/* ── LAYOUT ── */
+/* â”€â”€ LAYOUT â”€â”€ */
 .layout{display:flex;flex:1;min-height:0;overflow:hidden}
+.home-main{display:none;flex:1;min-height:0;overflow-y:auto;background:var(--bg)}
+body:not(.home-mode):not(.analyze-mode) .layout{display:none}
+body.home-mode .home-main{display:flex;flex-direction:column}
+body.home-mode .layout{display:none}
+body.analyze-mode .home-main{display:none}
+body.analyze-mode .layout{display:flex}
+.home-hero{position:relative;overflow:hidden;min-height:calc(100vh - 56px);padding:42px 48px 34px;background:#171717;border-bottom:1px solid var(--br)}
+.home-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,85,0,.15),transparent 34%),linear-gradient(180deg,#202020 0%,#171717 52%,var(--sf) 100%);pointer-events:none}
+.home-hero::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(90deg,rgba(0,0,0,.84),rgba(0,0,0,.18));pointer-events:none}
+.home-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(520px,1fr) minmax(360px,520px);grid-template-areas:"copy report";gap:20px;align-items:start;max-width:1380px;margin:0 auto}
+.home-copy{grid-area:copy;display:flex;flex-direction:column;min-height:0;padding:8px 0}
+.home-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:24px}
+.home-actions .btn{font-size:14px;padding:10px 18px}
+.home-note{font-size:12px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+.home-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:50px;width:100%}
+.home-lower{position:relative;z-index:1;max-width:1380px;margin:22px auto 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.home-card{background:rgba(18,18,18,.72);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.home-card-k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:8px}
+.home-card-v{font-size:13px;color:var(--tx2);line-height:1.6}
+.home-demo{padding:34px 48px 46px;background:var(--bg);border-top:1px solid var(--br)}
+.home-demo-inner{max-width:1380px;margin:0 auto;display:grid;grid-template-columns:minmax(420px,1.05fr) minmax(360px,.95fr);gap:18px;align-items:start}
+.home-demo-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.home-demo-title{font-size:18px;font-weight:800;color:var(--tx)}
+.home-demo-sub{font-size:13px;color:var(--tx3);margin-top:3px}
+.demo-board,.demo-summary{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);overflow:hidden}
+.demo-board-h{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--br);background:var(--sf2)}
+.demo-team-k{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3)}
+.demo-team-v{font-size:22px;font-weight:800;color:var(--tx);margin-top:2px}
+.demo-team-v.ac{color:var(--or)}
+.demo-vs{font-size:11px;font-weight:800;color:var(--tx3)}
+.demo-lists{display:grid;grid-template-columns:1fr 1fr}
+.demo-list:first-child{border-right:1px solid var(--br)}
+.demo-row{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--br)}
+.demo-row:last-child{border-bottom:none}
+.demo-rank{font-size:11px;font-weight:800;color:var(--tx3)}
+.demo-name{font-size:13px;font-weight:800;color:var(--tx)}
+.demo-tank{font-size:11px;color:var(--tx3);margin-top:1px}
+.demo-bpr{font-size:13px;font-weight:800;color:var(--tx)}
+.demo-bpr.ac{color:var(--or)}
+.demo-summary{padding:16px}
+.demo-summary-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--tx);margin-bottom:12px}
+.demo-summary-line{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;margin-bottom:11px}
+.demo-summary-k{font-size:11px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px}
+.demo-track{height:8px;background:var(--sf3);border-radius:999px;overflow:hidden}
+.demo-fill{height:100%;background:var(--or)}
+.demo-fill.blue{background:var(--bl)}
+.demo-summary-v{font-size:12px;font-weight:800;color:var(--tx2);text-align:right}
+.demo-note{margin-top:14px;border:1px solid var(--br);border-radius:var(--rs);padding:12px;background:var(--bg);font-size:13px;color:var(--tx2);line-height:1.6}
 
-/* ── SIDEBAR ── */
-.sidebar{width:var(--nav);background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;padding:12px 8px;gap:2px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+/* â”€â”€ SIDEBAR â”€â”€ */
+.sidebar{width:var(--nav);background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;padding:14px 10px;gap:4px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.side-head{padding:10px 10px 14px;border-bottom:1px solid var(--br);margin-bottom:8px}
+.side-title{font-size:13px;font-weight:800;color:var(--tx);letter-spacing:.2px}
+.side-sub{font-size:11px;color:var(--tx3);margin-top:3px;line-height:1.4}
 .sb-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;color:var(--tx3);padding:10px 10px 4px;margin-top:4px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rs);font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .12s;border:none;background:none;width:100%;text-align:left}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--rs);font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;transition:all .12s;border:1px solid transparent;background:none;width:100%;text-align:left}
 .sb-item:hover{color:var(--tx);background:var(--sf2)}
-.sb-item.active{color:var(--tx);background:var(--sf3)}
+.sb-item.active{color:var(--tx);background:var(--sf3);border-color:var(--br)}
 .sb-item.active .sb-ico{color:var(--or)}
 .sb-item.dim{opacity:.35;pointer-events:none}
 .sb-ico{color:var(--tx3);flex-shrink:0;transition:color .12s}
 
-/* ── BUTTONS ── */
+/* â”€â”€ BUTTONS â”€â”€ */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0}
 .btn-or{background:var(--or);color:#fff}
 .btn-or:hover{background:var(--or2)}
@@ -54,18 +124,80 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .btn-upload{background:var(--sf3);color:var(--tx2);border:1px solid var(--br)}
 .btn-upload:hover{color:var(--tx);border-color:var(--or);background:var(--or-dim)}
 .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-#fileInput{display:none}
+#fileInput,#folderFileInput,#excelInput{display:none}
 
-/* ── CONTENT ── */
+/* â”€â”€ CONTENT â”€â”€ */
 .content{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto}
 
-/* ── PAGE HEADER ── */
-.page-hdr{background:var(--sf);border-bottom:1px solid var(--br);padding:22px 28px 20px;flex-shrink:0}
-.eyebrow{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--or);margin-bottom:3px}
-.page-title{font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.3px}
-.page-sub{font-size:13px;color:var(--tx2);margin-top:3px;margin-bottom:18px}
-
-.import-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* â”€â”€ PAGE HEADER â”€â”€ */
+.page-hdr{position:relative;overflow:hidden;background:#171717;border-bottom:1px solid var(--br);padding:30px 28px 22px;flex-shrink:0}
+.page-hdr::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,85,0,.12),transparent 34%),linear-gradient(180deg,#202020 0%,#171717 52%,var(--sf) 100%);pointer-events:none}
+.page-hdr::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,.18));pointer-events:none}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(520px,1fr) minmax(360px,520px);grid-template-areas:"copy report" "upload upload";gap:18px;align-items:stretch}
+body.analyze-mode .page-hdr{padding:24px 28px 20px}
+body.analyze-mode .hero-grid{grid-template-columns:1fr;grid-template-areas:"upload"}
+body.analyze-mode .hero-copy,body.analyze-mode .report-preview{display:none}
+body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.hero-copy{grid-area:copy;display:flex;flex-direction:column;justify-content:space-between;min-height:320px;padding:8px 0}
+.eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;color:var(--or);margin-bottom:10px}
+.page-title{font-size:58px;font-weight:800;color:var(--tx);letter-spacing:0;line-height:.95;margin-bottom:14px}
+.page-sub{font-size:17px;color:var(--tx2);max-width:920px;margin:0;line-height:1.65}
+.hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:auto;width:100%;transform:translateY(-28px)}
+.hero-stat{min-height:92px;background:rgba(18,18,18,.72);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:17px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);display:flex;flex-direction:column;justify-content:flex-start}
+.hero-stat-val{font-size:28px;font-weight:800;color:var(--tx);line-height:1}
+.hero-stat-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-top:8px}
+.report-preview{grid-area:report;background:rgba(18,18,18,.82);border:1px solid rgba(255,255,255,.11);border-radius:var(--r);padding:16px;box-shadow:0 18px 55px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);min-height:320px}
+.preview-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.preview-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--tx)}
+.preview-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--gn);font-weight:700}
+.preview-live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gn);box-shadow:0 0 0 3px rgba(31,214,85,.12)}
+.preview-score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:16px}
+.preview-team{border:1px solid var(--br);border-radius:var(--rs);padding:12px;background:var(--sf)}
+.preview-team.enemy{background:#181b20}
+.preview-k{font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.9px}
+.preview-v{font-size:28px;font-weight:800;color:var(--tx);line-height:1.1;margin-top:4px}
+.preview-v.ac{color:var(--or)}
+.preview-vs{font-size:11px;font-weight:800;color:var(--tx3)}
+.preview-bars{display:grid;gap:10px;margin-bottom:16px}
+.bar-row{display:grid;grid-template-columns:72px 1fr 42px;gap:10px;align-items:center}
+.bar-label{font-size:11px;color:var(--tx3);font-weight:700}
+.bar-track{height:8px;background:var(--sf3);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:var(--or)}
+.bar-fill.blue{background:var(--bl)}
+.bar-val{font-size:11px;color:var(--tx2);text-align:right;font-weight:700}
+.preview-list{display:grid;gap:8px}
+.preview-player{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--br);border-radius:var(--rs);background:rgba(255,255,255,.025)}
+.preview-rank{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--or);color:white;font-size:11px;font-weight:800}
+.preview-name{font-size:12px;color:var(--tx);font-weight:700}
+.preview-sub{font-size:11px;color:var(--tx3);margin-top:1px}
+.preview-bpr{font-size:12px;color:var(--tx);font-weight:800}
+.upload-card{grid-area:upload;background:rgba(18,18,18,.86);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:16px;box-shadow:0 18px 55px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.04)}
+.upload-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:10px}
+.upload-grid{display:grid;grid-template-columns:180px minmax(360px,1fr) 220px;gap:14px;align-items:stretch}
+.mode-switch{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+.mode-btn{border:1px solid var(--br);background:var(--sf2);color:var(--tx2);border-radius:var(--rs);padding:9px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.mode-btn.active{border-color:var(--or);background:var(--or-dim);color:var(--tx)}
+.session-bar{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+.session-bar.hidden{display:none}
+.session-meta{grid-column:1 / -1;font-size:12px;color:var(--tx3);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.session-meta strong{color:var(--tx)}
+.action-panel{display:grid;gap:8px;align-content:start}
+.action-panel-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3)}
+.action-panel .btn{justify-content:center;width:100%}
+.db-status{font-size:12px;color:var(--tx3);line-height:1.4}
+.db-status strong{color:var(--tx)}
+.import-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
+.import-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.drop-zone{border:1px dashed var(--br2);border-radius:var(--r);background:#151515;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:border-color .15s,background .15s;min-height:94px;cursor:pointer}
+.drop-zone.drag{border-color:var(--or);background:var(--or-dim)}
+.drop-zone:focus-visible{outline:1px solid var(--or);outline-offset:2px}
+.drop-main{display:flex;align-items:center;gap:12px;min-width:0}
+.drop-ico{width:34px;height:34px;border-radius:var(--rs);background:var(--sf3);display:flex;align-items:center;justify-content:center;color:var(--or);flex-shrink:0}
+.drop-title{font-size:13px;font-weight:700;color:var(--tx)}
+.drop-sub{font-size:12px;color:var(--tx3);margin-top:2px}
+.drop-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.link-btn{background:none;border:none;color:var(--tx3);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:6px 4px}
+.link-btn:hover{color:var(--or)}
 .f-input{background:var(--bg);border:1px solid var(--br);border-radius:var(--rs);color:var(--tx);font-family:'Inter',sans-serif;font-size:13px;padding:9px 13px;outline:none;transition:border-color .15s;min-width:0}
 .f-input:focus{border-color:var(--or)}
 .f-input::placeholder{color:var(--tx3)}
@@ -73,23 +205,118 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
 .sep{color:var(--tx3);font-size:12px;font-weight:500;flex-shrink:0}
 
+.health-panel{display:none!important}
+.health-panel.show{display:none!important}
+.health-grid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}
+.health-item{min-width:0}
+.health-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:2px}
+.health-val{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.health-val.ok{color:var(--gn)}.health-val.err{color:var(--rd)}
+
 /* stats strip */
-.strip{display:none;gap:32px;border-top:1px solid var(--br);margin-top:20px;padding-top:18px;flex-wrap:wrap}
+.strip{position:relative;z-index:1;display:none;gap:32px;border-top:1px solid var(--br);margin-top:20px;padding-top:18px;flex-wrap:wrap}
 .sp-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:2px}
 .sp-val{font-size:19px;font-weight:700;color:var(--tx);line-height:1}
 .sp-val.ac{color:var(--or)}
 
-/* ── SECTION TABS ── */
+/* â”€â”€ SECTION TABS â”€â”€ */
 .sec-tabs{display:none;align-items:center;gap:0;padding:0 28px;background:var(--sf);border-bottom:1px solid var(--br);flex-shrink:0}
 .sec-tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px}
 .sec-tab:hover{color:var(--tx)}
 .sec-tab.active{color:var(--tx);border-bottom-color:var(--or)}
 
-/* ── OVERVIEW SECTION ── */
+/* â”€â”€ OVERVIEW SECTION â”€â”€ */
 .section{display:none;padding:24px 28px 32px;flex:1}
 .section.visible{display:block}
+.panel-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
+.analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(280px,1fr));gap:16px;margin-bottom:16px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.metric-box,.chart-box,.summary-box,.settings-box{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);padding:16px}
+.metric-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:5px}
+.metric-val{font-size:22px;font-weight:700;color:var(--tx)}
+.metric-sub{font-size:12px;color:var(--tx3);margin-top:3px}
+.chart-box canvas{width:100%;height:220px;display:block}
+.summary-text{font-size:13px;color:var(--tx2);line-height:1.75;white-space:pre-line}
+.settings-grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:12px}
+.settings-row{border:1px solid var(--br);border-radius:var(--rs);padding:12px;background:var(--bg)}
+.settings-k{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:4px}
+.settings-v{font-size:13px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-analytics{padding:48px 16px;text-align:center;color:var(--tx3)}
+.site-footer{margin-top:auto;border-top:1px solid var(--br);padding:14px 28px;background:var(--sf);color:var(--tx3);font-size:12px;line-height:1.5}
+.site-footer a{color:var(--tx2);text-decoration:none;font-weight:600}
+.site-footer a:hover{color:var(--or)}
 
-/* ── MATCH OVERVIEW (two-team side by side) ── */
+@media (max-width: 760px){
+  body{font-size:13px}
+  .home-demo{padding:24px 14px 32px}
+  .home-demo-inner{grid-template-columns:1fr}
+  .demo-board-h{grid-template-columns:1fr;gap:8px}
+  .demo-lists{grid-template-columns:1fr}
+  .demo-list:first-child{border-right:none;border-bottom:1px solid var(--br)}
+  .demo-summary-line{grid-template-columns:1fr;gap:6px}
+  .demo-summary-v{text-align:left}
+  .topnav{height:auto;min-height:56px;padding:10px 12px;gap:8px;flex-wrap:wrap}
+  .logo{margin-right:8px}
+  .nav-tabs{order:3;width:100%;overflow-x:auto}
+  .nav-right{margin-left:0}
+  .layout{display:block;overflow:visible}
+  .sidebar{position:static;width:100%;height:auto;border-right:none;border-bottom:1px solid var(--br);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:8px}
+  .sb-lbl{display:none}
+  .sb-item{justify-content:center;padding:9px 6px;font-size:12px}
+  .content{overflow:visible}
+  .page-hdr{padding:18px 14px}
+  .hero-grid{grid-template-columns:1fr;grid-template-areas:"copy" "report" "upload";gap:14px}
+  .hero-copy{min-height:auto}
+  .page-title{font-size:34px}
+  .hero-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:18px;transform:none}
+  .hero-stat{min-height:78px;padding:11px 10px}
+  .hero-stat-val{font-size:20px}
+  .upload-grid{grid-template-columns:1fr}
+  .session-bar{grid-template-columns:1fr 1fr}
+  .session-meta{grid-column:1 / -1;text-align:left;white-space:normal}
+  .import-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .import-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .import-actions .btn{width:100%;justify-content:center}
+  .import-actions .btn-ghost{grid-column:1 / -1}
+  .drop-zone{align-items:flex-start;flex-direction:column;padding:14px}
+  .drop-actions{width:100%;display:grid;grid-template-columns:1fr}
+  .drop-actions .btn{width:100%;justify-content:center}
+  .f-input-wide{width:100%;min-width:0}
+  .sep{display:none}
+  .desktop-only{display:none!important}
+  .health-grid,.metric-grid,.analytics-grid,.settings-grid{grid-template-columns:1fr}
+  .match-wrap{grid-template-columns:1fr;gap:14px}
+  .vs-col{display:none}
+  .section,.table-area{padding:16px 14px 24px}
+  .site-footer{padding:14px;text-align:center}
+  .toolbar{padding:12px 14px}
+  .table-card{overflow-x:auto}
+  .strip{gap:18px}
+}
+
+@media (max-width: 1320px){
+  .hero-grid{grid-template-columns:minmax(420px,1fr) minmax(360px,500px)}
+  .upload-grid{grid-template-columns:170px minmax(320px,1fr) 170px}
+}
+
+@media (max-width: 980px){
+  .home-grid{grid-template-columns:1fr;grid-template-areas:"copy" "report"}
+  .home-stats{margin-top:28px}
+  .home-lower{grid-template-columns:1fr}
+  .home-demo-inner{grid-template-columns:1fr}
+  .hero-grid{grid-template-columns:1fr;grid-template-areas:"copy" "report" "upload"}
+  .page-title{font-size:46px}
+  .hero-copy{min-height:auto}
+  .preview-list{grid-template-columns:1fr 1fr}
+  .upload-grid{grid-template-columns:1fr}
+}
+
+@media (max-width: 760px){
+  .page-title{font-size:34px}
+  .preview-list{grid-template-columns:1fr}
+}
+
+/* â”€â”€ MATCH OVERVIEW (two-team side by side) â”€â”€ */
 .match-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:start;margin-bottom:28px}
 .team-side{}
 .team-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r) var(--r) 0 0;border-bottom:none}
@@ -106,6 +333,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .ov-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--br);transition:background .1s}
 .ov-row:last-child{border-bottom:none}
 .ov-row:hover{background:rgba(255,255,255,.025)}
+.ov-row{cursor:pointer}
+.ov-row:focus-visible{outline:1px solid var(--or);outline-offset:-2px}
 .ov-rank{font-size:11px;font-weight:700;color:var(--tx3);width:20px;text-align:center;flex-shrink:0}
 .ov-rank.r1{color:#FFD700}.ov-rank.r2{color:#B0B0B0}.ov-rank.r3{color:#CD7F32}
 .ov-avatar{width:28px;height:28px;border-radius:50%;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--tx3);border:1px solid var(--br);text-transform:uppercase;flex-shrink:0}
@@ -119,7 +348,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .ov-bpr-val{font-size:13px;font-weight:700;color:var(--tx)}
 .ov-adr{font-size:11px;color:var(--tx3)}
 
-/* ── TOOLBAR ── */
+/* â”€â”€ TOOLBAR â”€â”€ */
 .toolbar{display:none;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid var(--br);gap:10px;flex-wrap:wrap;background:var(--sf);flex-shrink:0}
 .toolbar-l{display:flex;align-items:center;gap:8px}
 .search-wrap{position:relative}
@@ -135,7 +364,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .dd-row:hover{background:var(--sf3);color:var(--tx)}
 .dd-row input{accent-color:var(--or);cursor:pointer;width:14px;height:14px}
 
-/* ── DETAIL TABLE ── */
+/* â”€â”€ DETAIL TABLE â”€â”€ */
 .table-area{display:none;padding:20px 28px 32px}
 .table-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);overflow:hidden}
 table{width:100%;border-collapse:collapse;white-space:nowrap}
@@ -198,6 +427,100 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 .toast.ok::before{background:var(--gn)}.toast.err::before{background:var(--rd)}.toast.inf::before{background:var(--or)}
 @keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
+.player-modal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.68)}
+.player-modal.show{display:flex}
+.player-panel{width:min(720px,100%);background:var(--sf);border:1px solid var(--br2);border-radius:var(--r);box-shadow:0 26px 80px rgba(0,0,0,.55);overflow:hidden}
+.player-panel-h{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--br);background:linear-gradient(180deg,var(--sf2),var(--sf))}
+.player-panel-title{font-size:18px;font-weight:800;color:var(--tx)}
+.player-panel-sub{font-size:12px;color:var(--tx3);margin-top:3px}
+.modal-close{background:var(--bg);border:1px solid var(--br);color:var(--tx2);border-radius:var(--rs);width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1}
+.modal-close:hover{color:var(--tx);border-color:var(--or)}
+.player-panel-b{padding:18px 20px;display:grid;gap:14px}
+.player-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.player-kpi{background:var(--bg);border:1px solid var(--br);border-radius:var(--rs);padding:11px}
+.player-kpi-k{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;font-weight:800}
+.player-kpi-v{font-size:20px;color:var(--tx);font-weight:800;margin-top:3px}
+.player-bars{display:grid;gap:10px}
+.player-bar-row{display:grid;grid-template-columns:92px 1fr 58px;gap:12px;align-items:center}
+.player-bar-k{font-size:11px;color:var(--tx3);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.player-bar-track{height:10px;background:var(--sf3);border-radius:999px;overflow:hidden}
+.player-bar-fill{height:100%;background:var(--or)}
+.player-bar-v{font-size:12px;color:var(--tx2);font-weight:700;text-align:right}
+@media (max-width: 620px){
+  .player-modal{padding:12px}
+  .player-panel{max-height:calc(100dvh - 24px);overflow:auto}
+  .player-panel-h{padding:14px}
+  .player-panel-b{padding:14px}
+  .player-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .player-bar-row{grid-template-columns:1fr;gap:6px}
+  .player-bar-v{text-align:left}
+}
+
+@media (max-width: 760px){
+  body.analyze-mode{overflow-x:hidden}
+  body.analyze-mode .topnav{position:sticky;top:0}
+  body.analyze-mode .logo-name{font-size:13px}
+  body.analyze-mode .nav-tab{padding:7px 10px}
+  body.analyze-mode .sys-pill{height:28px}
+  body.analyze-mode .layout{display:block;min-height:auto;overflow:visible}
+  body.analyze-mode .sidebar{position:sticky;top:0;z-index:90;width:100%;height:auto;display:flex;flex-direction:row;gap:8px;overflow-x:auto;padding:8px 12px;border-right:none;border-bottom:1px solid var(--br);scrollbar-width:none}
+  body.analyze-mode .sidebar::-webkit-scrollbar{display:none}
+  body.analyze-mode .side-head,body.analyze-mode .sb-lbl{display:none}
+  body.analyze-mode .sb-item{flex:0 0 auto;width:auto;min-width:max-content;padding:9px 11px;justify-content:center;font-size:12px;white-space:nowrap}
+  body.analyze-mode .sb-item.dim{display:none}
+  body.analyze-mode .content{overflow:visible;min-width:0}
+  body.analyze-mode .page-hdr{padding:12px;background:#171717}
+  body.analyze-mode .hero-grid{display:block}
+  body.analyze-mode .upload-card{padding:12px;border-radius:var(--r)}
+  body.analyze-mode .upload-card-title{margin-bottom:12px}
+  body.analyze-mode .upload-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  body.analyze-mode .mode-switch{grid-template-columns:1fr 1fr;margin-bottom:0}
+  body.analyze-mode .mode-btn{min-height:42px}
+  body.analyze-mode .drop-zone{min-height:132px;padding:14px;gap:14px}
+  body.analyze-mode .drop-main{align-items:flex-start}
+  body.analyze-mode .drop-actions{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
+  body.analyze-mode .drop-actions .btn,body.analyze-mode .action-panel .btn{min-height:42px}
+  body.analyze-mode .action-panel{border-top:1px solid var(--br);padding-top:12px}
+  body.analyze-mode .session-bar{grid-template-columns:1fr;gap:8px}
+  body.analyze-mode .strip{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px 12px;margin:0;border-top:1px solid var(--br);background:rgba(18,18,18,.45)}
+  body.analyze-mode .strip[style*="flex"]{display:grid!important}
+  body.analyze-mode .sp-val{font-size:17px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  body.analyze-mode .sec-tabs{overflow-x:auto;padding:0 12px;scrollbar-width:none}
+  body.analyze-mode .sec-tabs::-webkit-scrollbar{display:none}
+  body.analyze-mode .sec-tab{flex:0 0 auto;padding:13px 12px;white-space:nowrap}
+  body.analyze-mode .section{padding:14px 12px 22px}
+  body.analyze-mode .match-wrap{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:0}
+  body.analyze-mode .team-header{padding:12px}
+  body.analyze-mode .ov-row{padding:11px 12px;gap:9px}
+  body.analyze-mode .ov-avatar{width:26px;height:26px}
+  body.analyze-mode .ov-name{font-size:12px}
+  body.analyze-mode .ov-tank,body.analyze-mode .ov-adr{font-size:10px}
+  body.analyze-mode .ov-bpr-val{font-size:12px}
+  body.analyze-mode .metric-grid,body.analyze-mode .analytics-grid,body.analyze-mode .settings-grid{grid-template-columns:1fr;gap:10px}
+  body.analyze-mode .metric-box,body.analyze-mode .chart-box,body.analyze-mode .summary-box,body.analyze-mode .settings-box{padding:12px}
+  body.analyze-mode .chart-box canvas{height:190px}
+  body.analyze-mode .toolbar{padding:10px 12px;gap:8px;align-items:stretch}
+  body.analyze-mode .toolbar-l{display:grid;grid-template-columns:1fr auto;gap:8px;width:100%}
+  body.analyze-mode .search-wrap{min-width:0}
+  body.analyze-mode .search-inp{width:100%;min-height:38px}
+  body.analyze-mode .cnt-lbl{width:100%;text-align:left}
+  body.analyze-mode .table-area{padding:12px 12px 22px;overflow:hidden}
+  body.analyze-mode .table-card{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  body.analyze-mode table{min-width:980px}
+  body.analyze-mode th,body.analyze-mode td{padding:10px 11px}
+  body.analyze-mode .site-footer{padding:12px;text-align:center}
+}
+
+@media (max-width: 420px){
+  body.analyze-mode .topnav{padding:8px 10px}
+  body.analyze-mode .logo{width:100%;margin-right:0}
+  body.analyze-mode .nav-tabs{order:2;width:auto;flex:1}
+  body.analyze-mode .nav-right{order:2;margin-left:auto}
+  body.analyze-mode .strip{grid-template-columns:1fr}
+  body.analyze-mode .toolbar-l{grid-template-columns:1fr}
+  body.analyze-mode .dd-wrap .btn{width:100%;justify-content:center}
+}
+
 /* upload progress bar */
 .upload-prog{display:none;height:2px;background:var(--br);position:fixed;top:56px;left:0;right:0;z-index:300}
 .upload-prog-fill{height:100%;background:var(--or);width:0%;transition:width .2s}
@@ -211,10 +534,27 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 </head>
 <body>
 
-<div class="veil" id="veil"><div class="spinner"></div><div class="spin-lbl" id="veilMsg">Processing replays…</div></div>
+<div class="veil" id="veil"><div class="spinner"></div><div class="spin-lbl" id="veilMsg">Processing replays...</div></div>
 <div class="upload-prog" id="upProg"><div class="upload-prog-fill" id="upFill"></div></div>
 <div class="toasts" id="toasts"></div>
-<input type="file" id="fileInput" multiple accept=".wotbreplay" webkitdirectory/>
+<div class="player-modal" id="playerModal" onclick="closePlayerModal(event)">
+  <div class="player-panel" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle" onclick="event.stopPropagation()">
+    <div class="player-panel-h">
+      <div>
+        <div class="player-panel-title" id="playerModalTitle">Player details</div>
+        <div class="player-panel-sub" id="playerModalSub">Session metrics</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closePlayerModal()" aria-label="Close player details">&times;</button>
+    </div>
+    <div class="player-panel-b">
+      <div class="player-kpis" id="playerKpis"></div>
+      <div class="player-bars" id="playerBars"></div>
+    </div>
+  </div>
+</div>
+<input type="file" id="fileInput" multiple accept=".wotbreplay"/>
+<input type="file" id="folderFileInput" multiple accept=".wotbreplay" webkitdirectory/>
+<input type="file" id="excelInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
 
 <!-- TOP NAV -->
 <nav class="topnav">
@@ -223,16 +563,19 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     <span class="logo-name">PERFORMANCE STATS</span>
   </a>
   <div class="nav-tabs">
-    <a class="nav-tab active" href="#">
+    <a class="nav-tab" id="navHome" href="/">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Overview
+      Home
     </a>
-    <a class="nav-tab dim" href="#">
+    <a class="nav-tab" id="navAnalyze" href="/analyze">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Analytics
+      Analyze
     </a>
   </div>
   <div class="nav-right">
+    <button class="sys-pill" id="sysPill" onclick="refreshHealth(true)" title="System status">
+      <span class="sys-dot"></span><span id="sysTxt">Checking</span>
+    </button>
     <button class="btn btn-ghost" id="btnExport" disabled onclick="exportXlsx()" style="font-size:12px;padding:7px 14px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export Excel
@@ -240,25 +583,135 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   </div>
 </nav>
 
+<main class="home-main" id="homeMain">
+  <section class="home-hero">
+    <div class="home-grid">
+      <div class="home-copy">
+        <div>
+          <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
+          <div class="page-title">BlitzScrim</div>
+          <div class="page-sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
+          <div class="home-actions">
+            <a class="btn btn-or" href="/analyze">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+              Open analyzer
+            </a>
+            <span class="home-note">Scrim reports · Individual sessions · Export ready</span>
+          </div>
+        </div>
+        <div class="home-stats">
+          <div class="hero-stat"><div class="hero-stat-val" id="globalReplays">-</div><div class="hero-stat-lbl">Replays analyzed</div></div>
+          <div class="hero-stat"><div class="hero-stat-val" id="globalPlayers">-</div><div class="hero-stat-lbl">Players analyzed</div></div>
+          <div class="hero-stat"><div class="hero-stat-val" id="globalSessions">-</div><div class="hero-stat-lbl">Sessions</div></div>
+        </div>
+      </div>
+
+      <div class="report-preview" aria-label="Session report preview">
+        <div class="preview-head">
+          <div class="preview-title">Session report</div>
+          <div class="preview-live">Ready</div>
+        </div>
+        <div class="preview-score">
+          <div class="preview-team">
+            <div class="preview-k">Our BPR</div>
+            <div class="preview-v ac">1.12</div>
+          </div>
+          <div class="preview-vs">VS</div>
+          <div class="preview-team enemy">
+            <div class="preview-k">Enemy BPR</div>
+            <div class="preview-v">0.96</div>
+          </div>
+        </div>
+        <div class="preview-bars">
+          <div class="bar-row"><div class="bar-label">ADR</div><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><div class="bar-val">+184</div></div>
+          <div class="bar-row"><div class="bar-label">Support</div><div class="bar-track"><div class="bar-fill blue" style="width:58%"></div></div><div class="bar-val">Review</div></div>
+          <div class="bar-row"><div class="bar-label">Accuracy</div><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><div class="bar-val">66%</div></div>
+        </div>
+        <div class="preview-list">
+          <div class="preview-player"><div class="preview-rank">1</div><div><div class="preview-name">Top performer</div><div class="preview-sub">Damage pressure and survival</div></div><div class="preview-bpr">1.34</div></div>
+          <div class="preview-player"><div class="preview-rank">2</div><div><div class="preview-name">Next objective</div><div class="preview-sub">Earlier focus calls</div></div><div class="preview-bpr">+8%</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="home-lower">
+      <div class="home-card"><div class="home-card-k">Scrim analysis</div><div class="home-card-v">Upload a block of replays and compare your team against the opponent side.</div></div>
+      <div class="home-card"><div class="home-card-k">Individual sessions</div><div class="home-card-v">Add replays match by match and finish with focused objectives.</div></div>
+      <div class="home-card"><div class="home-card-k">Clean reporting</div><div class="home-card-v">Charts, BPR ratings, summaries, and Excel exports stay in the analyzer workspace.</div></div>
+    </div>
+  </section>
+  <section class="home-demo" aria-label="Sample analysis">
+    <div class="home-demo-inner">
+      <div>
+        <div class="home-demo-head">
+          <div>
+            <div class="eyebrow">Sample session</div>
+            <div class="home-demo-title">Full scrim report preview</div>
+            <div class="home-demo-sub">Fictional players, same layout as a real analysis.</div>
+          </div>
+          <a class="btn btn-ghost" href="/analyze">Try with replays</a>
+        </div>
+        <div class="demo-board">
+          <div class="demo-board-h">
+            <div><div class="demo-team-k">Our avg BPR</div><div class="demo-team-v ac">1.08</div></div>
+            <div class="demo-vs">VS</div>
+            <div style="text-align:right"><div class="demo-team-k">Enemy avg BPR</div><div class="demo-team-v">0.94</div></div>
+          </div>
+          <div class="demo-lists">
+            <div class="demo-list">
+              <div class="demo-row"><div class="demo-rank">1</div><div><div class="demo-name">AsterRook</div><div class="demo-tank">Kranvagn</div></div><div class="demo-bpr ac">1.42</div></div>
+              <div class="demo-row"><div class="demo-rank">2</div><div><div class="demo-name">Northlane</div><div class="demo-tank">XM551 Sheridan</div></div><div class="demo-bpr">1.21</div></div>
+              <div class="demo-row"><div class="demo-rank">3</div><div><div class="demo-name">PulseNine</div><div class="demo-tank">Concept 1B</div></div><div class="demo-bpr">1.09</div></div>
+              <div class="demo-row"><div class="demo-rank">4</div><div><div class="demo-name">Vanta</div><div class="demo-tank">FV4005</div></div><div class="demo-bpr">0.96</div></div>
+            </div>
+            <div class="demo-list">
+              <div class="demo-row"><div class="demo-rank">1</div><div><div class="demo-name">IronVale</div><div class="demo-tank">M-VI-Yoh</div></div><div class="demo-bpr ac">1.31</div></div>
+              <div class="demo-row"><div class="demo-rank">2</div><div><div class="demo-name">Kairox</div><div class="demo-tank">T110E5</div></div><div class="demo-bpr">1.08</div></div>
+              <div class="demo-row"><div class="demo-rank">3</div><div><div class="demo-name">Sable</div><div class="demo-tank">Object 268/4</div></div><div class="demo-bpr">0.89</div></div>
+              <div class="demo-row"><div class="demo-rank">4</div><div><div class="demo-name">Mistral</div><div class="demo-tank">TVP T 50/51</div></div><div class="demo-bpr">0.73</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-summary">
+        <div class="demo-summary-title">What the report surfaces</div>
+        <div class="demo-summary-line"><div class="demo-summary-k">ADR edge</div><div class="demo-track"><div class="demo-fill" style="width:67%"></div></div><div class="demo-summary-v">+216</div></div>
+        <div class="demo-summary-line"><div class="demo-summary-k">Focus fire</div><div class="demo-track"><div class="demo-fill blue" style="width:52%"></div></div><div class="demo-summary-v">Review</div></div>
+        <div class="demo-summary-line"><div class="demo-summary-k">Survival</div><div class="demo-track"><div class="demo-fill" style="width:74%"></div></div><div class="demo-summary-v">Strong</div></div>
+        <div class="demo-note">AI summary: damage pressure is ahead, but two early trades were split across targets. Next block: call the first focus target before crossing and keep the same heavy-side structure.</div>
+        <div class="demo-note">Excel export keeps both teams in separate sheets. Excel import can turn a saved team sheet into a local team database for later comparison.</div>
+      </div>
+    </div>
+  </section>
+</main>
+
 <div class="layout">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sb-lbl">Session</div>
-    <button class="sb-item active" onclick="switchSection('overview')">
+    <div class="side-head">
+      <div class="side-title">Analyzer</div>
+      <div class="side-sub">Upload replays, review teams, export reports.</div>
+    </div>
+    <div class="sb-lbl">Workflow</div>
+    <button class="sb-item active" data-section="overview" onclick="switchSection('overview')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-      Overview
+      Match Review
     </button>
-    <button class="sb-item dim" id="sbOurTeam" onclick="switchSection('our')">
+    <button class="sb-item" id="sbAnalytics" data-section="analytics" onclick="switchSection('analytics')">
+      <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
+      Reports
+    </button>
+    <div class="sb-lbl">Tables</div>
+    <button class="sb-item dim" id="sbOurTeam" data-section="our" onclick="switchSection('our')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
       Our Team
     </button>
-    <button class="sb-item dim" id="sbEnemyTeam" onclick="switchSection('enemy')">
+    <button class="sb-item dim" id="sbEnemyTeam" data-section="enemy" onclick="switchSection('enemy')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
       Enemy Team
     </button>
-    <div class="sb-lbl">Tools</div>
-    <button class="sb-item dim">
+    <div class="sb-lbl">System</div>
+    <button class="sb-item" id="sbSettings" data-section="settings" onclick="switchSection('settings')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></span>
       Settings
     </button>
@@ -269,40 +722,147 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 
     <!-- PAGE HEADER -->
     <div class="page-hdr">
-      <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
-      <div class="page-title">Team Statistics</div>
-      <div class="page-sub">Paste a folder path or upload replay files directly from your machine</div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div>
+            <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
+            <div class="page-title">BlitzScrim</div>
+            <div class="page-sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Replays analyzed</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Players analyzed</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Sessions</div></div>
+          </div>
+        </div>
 
-      <div class="import-row">
-        <input class="f-input f-input-wide" id="folderInput" type="text"
-          placeholder="D:\World of Tanks Blitz\replays\2026-03-18"
-          onkeydown="if(event.key==='Enter')generatePath()"/>
-        <button class="btn btn-or" onclick="generatePath()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Generate
-        </button>
-        <span class="sep">or</span>
-        <button class="btn btn-upload" onclick="document.getElementById('fileInput').click()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Upload Folder
-        </button>
-        <button class="btn btn-ghost" onclick="clearAll()">Clear</button>
+        <div class="report-preview" aria-label="Session report preview">
+          <div class="preview-head">
+            <div class="preview-title">Session report</div>
+            <div class="preview-live">Ready</div>
+          </div>
+          <div class="preview-score">
+            <div class="preview-team">
+              <div class="preview-k">Our BPR</div>
+              <div class="preview-v ac">1.12</div>
+            </div>
+            <div class="preview-vs">VS</div>
+            <div class="preview-team enemy">
+              <div class="preview-k">Enemy BPR</div>
+              <div class="preview-v">0.96</div>
+            </div>
+          </div>
+          <div class="preview-bars">
+            <div class="bar-row">
+              <div class="bar-label">ADR</div>
+              <div class="bar-track"><div class="bar-fill" style="width:72%"></div></div>
+              <div class="bar-val">+184</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Support</div>
+              <div class="bar-track"><div class="bar-fill blue" style="width:58%"></div></div>
+              <div class="bar-val">Review</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label">Accuracy</div>
+              <div class="bar-track"><div class="bar-fill" style="width:66%"></div></div>
+              <div class="bar-val">66%</div>
+            </div>
+          </div>
+          <div class="preview-list">
+            <div class="preview-player">
+              <div class="preview-rank">1</div>
+              <div><div class="preview-name">Top performer</div><div class="preview-sub">Damage pressure and survival</div></div>
+              <div class="preview-bpr">1.34</div>
+            </div>
+            <div class="preview-player">
+              <div class="preview-rank">2</div>
+              <div><div class="preview-name">Next objective</div><div class="preview-sub">Earlier focus calls</div></div>
+              <div class="preview-bpr">+8%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="upload-card">
+          <div class="upload-card-title">Analyze replays</div>
+          <div class="upload-grid">
+            <div>
+              <div class="mode-switch" aria-label="Analysis mode">
+                <button class="mode-btn active" id="modeScrim" onclick="setAnalysisMode('scrim')">Scrim</button>
+                <button class="mode-btn" id="modeIndividual" onclick="setAnalysisMode('individual')">Individual</button>
+              </div>
+              <div class="import-row">
+                <input class="f-input f-input-wide local-only" id="folderInput" type="text"
+                  placeholder="D:\World of Tanks Blitz\replays\2026-03-18"
+                  onkeydown="if(event.key==='Enter')generatePath()"/>
+                <button class="btn btn-or local-only" onclick="generatePath()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Generate
+                </button>
+              </div>
+            </div>
+
+            <div class="drop-zone" id="dropZone" role="button" tabindex="0" onclick="openReplayPicker(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openReplayPicker(event)}">
+              <div class="drop-main">
+                <div class="drop-ico">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div>
+                  <div class="drop-title">Drop replay files here</div>
+                  <div class="drop-sub" id="uploadLimits">Only .wotbreplay files are accepted.</div>
+                </div>
+              </div>
+              <div class="drop-actions">
+                <button class="btn btn-or" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Select Files
+                </button>
+                <button class="link-btn desktop-only" onclick="event.stopPropagation();document.getElementById('folderFileInput').click()">Folder</button>
+                <button class="link-btn" id="clearBtn" onclick="event.stopPropagation();clearAll()" style="display:none">Clear</button>
+              </div>
+            </div>
+
+            <div class="action-panel">
+              <div class="action-panel-title">Excel workflow</div>
+              <button class="btn btn-or" id="btnExportPanel" disabled onclick="exportXlsx()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export Excel
+              </button>
+              <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()">Import team Excel</button>
+              <div class="db-status" id="teamDbStatus">No team database loaded</div>
+              <div class="session-bar hidden" id="sessionControls">
+                <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()">Start Session</button>
+                <button class="btn btn-ghost" id="finishSessionBtn" onclick="finishLiveSession()" disabled>Finish</button>
+                <div class="session-meta" id="sessionMeta">No active session</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="health-panel" id="healthPanel">
+        <div class="health-grid">
+          <div class="health-item"><div class="health-lbl">Parser</div><div class="health-val" id="hParser">-</div></div>
+          <div class="health-item"><div class="health-lbl">Tank DB</div><div class="health-val" id="hTankDb">-</div></div>
+          <div class="health-item"><div class="health-lbl">Upload Limit</div><div class="health-val" id="hUpload">-</div></div>
+          <div class="health-item"><div class="health-lbl">Executable</div><div class="health-val" id="hPath">-</div></div>
+        </div>
       </div>
 
       <div class="strip" id="strip">
-        <div><div class="sp-lbl">Replays</div><div class="sp-val" id="sReplays">—</div></div>
-        <div><div class="sp-lbl">Our Players</div><div class="sp-val" id="sOurPlayers">—</div></div>
-        <div><div class="sp-lbl">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">—</div></div>
-        <div><div class="sp-lbl">Our Avg BPR</div><div class="sp-val ac" id="sOurBpr">—</div></div>
-        <div><div class="sp-lbl">Enemy Avg BPR</div><div class="sp-val" id="sEnemyBpr">—</div></div>
-        <div><div class="sp-lbl">Our Best</div><div class="sp-val ac" id="sOurBest">—</div></div>
-        <div><div class="sp-lbl">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">—</div></div>
+        <div><div class="sp-lbl">Replays</div><div class="sp-val" id="sReplays">-</div></div>
+        <div><div class="sp-lbl">Our Players</div><div class="sp-val" id="sOurPlayers">-</div></div>
+        <div><div class="sp-lbl">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">-</div></div>
+        <div><div class="sp-lbl">Our Avg BPR</div><div class="sp-val ac" id="sOurBpr">-</div></div>
+        <div><div class="sp-lbl">Enemy Avg BPR</div><div class="sp-val" id="sEnemyBpr">-</div></div>
+        <div><div class="sp-lbl">Our Best</div><div class="sp-val ac" id="sOurBest">-</div></div>
+        <div><div class="sp-lbl">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">-</div></div>
       </div>
     </div>
 
     <!-- ERROR PANEL -->
     <div class="err-panel" id="errPanel">
-      <div class="err-title">⚠ Failed to parse</div>
+      <div class="err-title">Warning Failed to parse</div>
       <div class="err-list" id="errList"></div>
     </div>
 
@@ -322,14 +882,14 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       </button>
     </div>
 
-    <!-- ── OVERVIEW SECTION ── -->
+    <!-- â”€â”€ OVERVIEW SECTION â”€â”€ -->
     <div class="section" id="secOverview">
       <div class="match-wrap">
         <!-- OUR TEAM -->
         <div class="team-side">
           <div class="team-header">
             <span class="team-label-our">Our Team</span>
-            <span class="team-avg-bpr">Avg BPR <span id="ovOurAvg">—</span></span>
+            <span class="team-avg-bpr">Avg BPR <span id="ovOurAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovOurList"></div>
         </div>
@@ -343,19 +903,60 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <div class="team-side">
           <div class="team-header">
             <span class="team-label-enemy">Enemy Team</span>
-            <span class="team-avg-bpr">Avg BPR <span id="ovEnemyAvg">—</span></span>
+            <span class="team-avg-bpr">Avg BPR <span id="ovEnemyAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovEnemyList"></div>
         </div>
       </div>
     </div>
 
-    <!-- ── OUR TEAM TABLE SECTION ── -->
+    <!-- ANALYTICS SECTION -->
+    <div class="section" id="secAnalytics">
+      <div id="analyticsEmpty" class="empty-analytics">
+        <div class="empty-t">No session loaded</div>
+        <div class="empty-s">Load replays to generate charts and session insights</div>
+      </div>
+      <div id="analyticsContent" style="display:none">
+        <div class="metric-grid">
+          <div class="metric-box"><div class="metric-lbl">BPR Edge</div><div class="metric-val" id="mBprEdge">-</div><div class="metric-sub" id="mBprEdgeSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl">ADR Edge</div><div class="metric-val" id="mAdrEdge">-</div><div class="metric-sub" id="mAdrEdgeSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl">Best Player</div><div class="metric-val" id="mBestPlayer">-</div><div class="metric-sub" id="mBestPlayerSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl">Replay Health</div><div class="metric-val" id="mReplayHealth">-</div><div class="metric-sub" id="mReplayHealthSub">-</div></div>
+        </div>
+        <div class="analytics-grid">
+          <div class="chart-box"><div class="panel-title">Team Averages</div><canvas id="chartAverages" width="520" height="220"></canvas></div>
+          <div class="chart-box"><div class="panel-title">Tank Type Mix</div><canvas id="chartTypes" width="520" height="220"></canvas></div>
+          <div class="chart-box"><div class="panel-title">Top BPR Players</div><canvas id="chartTopBpr" width="520" height="220"></canvas></div>
+          <div class="summary-box"><div class="panel-title">AI Session Summary</div><div class="summary-text" id="aiSummary">-</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS SECTION -->
+    <div class="section" id="secSettings">
+      <div class="settings-box">
+        <div class="panel-title">System Settings</div>
+        <div class="settings-grid">
+          <div class="settings-row"><div class="settings-k">Parser</div><div class="settings-v" id="setParser">-</div></div>
+          <div class="settings-row"><div class="settings-k">Tank DB</div><div class="settings-v" id="setTankDb">-</div></div>
+          <div class="settings-row"><div class="settings-k">Upload Limit</div><div class="settings-v" id="setUpload">-</div></div>
+          <div class="settings-row"><div class="settings-k">File Limit</div><div class="settings-v" id="setFileLimit">-</div></div>
+          <div class="settings-row"><div class="settings-k">Temporary Storage</div><div class="settings-v" id="setStorage">-</div></div>
+          <div class="settings-row"><div class="settings-k">Executable</div><div class="settings-v" id="setPath">-</div></div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="refreshHealth(true)">Refresh System</button>
+          <button class="btn btn-ghost" onclick="copySessionSummary()">Copy Summary</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- â”€â”€ OUR TEAM TABLE SECTION â”€â”€ -->
     <div class="toolbar" id="toolbarOur">
       <div class="toolbar-l">
         <div class="search-wrap">
           <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-inp" id="searchOur" placeholder="Search player…" oninput="renderTable('our')"/>
+          <input class="search-inp" id="searchOur" placeholder="Search player..." oninput="renderTable('our')"/>
         </div>
         <div class="dd-wrap" id="ddOurWrap">
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('our')">
@@ -377,12 +978,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       </div>
     </div>
 
-    <!-- ── ENEMY TEAM TABLE SECTION ── -->
+    <!-- â”€â”€ ENEMY TEAM TABLE SECTION â”€â”€ -->
     <div class="toolbar" id="toolbarEnemy">
       <div class="toolbar-l">
         <div class="search-wrap">
           <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-inp" id="searchEnemy" placeholder="Search player…" oninput="renderTable('enemy')"/>
+          <input class="search-inp" id="searchEnemy" placeholder="Search player..." oninput="renderTable('enemy')"/>
         </div>
         <div class="dd-wrap" id="ddEnemyWrap">
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('enemy')">
@@ -404,11 +1005,17 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       </div>
     </div>
 
+    <footer class="site-footer">
+      PerFORmance &middot; Based on the original WoT Blitz Replay Analyzer project by
+      <a href="https://github.com/roklimovich/wotblitz-replay-analyzer" target="_blank" rel="noopener noreferrer">roklimovich</a>.
+      <a href="/privacy">Privacy</a>
+    </footer>
+
   </div><!-- /content -->
 </div><!-- /layout -->
 
 <script>
-const API = 'http://localhost:5000';
+const API = '';
 
 const COLS = [
   {k:'_rank',     h:'#',         vis:true,  fmt:'rank'},
@@ -446,18 +1053,105 @@ const COLS_ENEMY = COLS.map(c=>({...c}));
 
 let ourData   = [];
 let enemyData = [];
+let lastSession = {processed:0, discovered:0, errors:[]};
+let analysisMode = 'scrim';
+let liveSession = emptyLiveSession();
+let teamDatabase = [];
 let sortState = {
   our:   {k:'BPR', a:false},
   enemy: {k:'BPR', a:false},
 };
 let curSection = 'overview';
 
-// ── File input (folder upload) ─────────────────────────────
-document.getElementById('fileInput').addEventListener('change', async e => {
-  const files = [...e.target.files].filter(f => f.name.endsWith('.wotbreplay'));
-  if (!files.length) { toast('No .wotbreplay files found in selected folder','err'); return; }
+document.addEventListener('DOMContentLoaded', initPageMode);
+document.addEventListener('DOMContentLoaded', refreshHealth);
+document.addEventListener('DOMContentLoaded', refreshPublicStats);
+document.addEventListener('DOMContentLoaded', setupDropZone);
+document.addEventListener('DOMContentLoaded', restoreLiveSession);
+document.addEventListener('DOMContentLoaded', restoreTeamDatabase);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePlayerModal();
+});
+window.addEventListener('pagehide', () => {
+  if (navigator.sendBeacon) navigator.sendBeacon(`${API}/api/session/close`, new Blob([], {type:'application/json'}));
+});
 
-  setVeil(true, `Uploading ${files.length} replays…`);
+function initPageMode() {
+  const isAnalyze = location.pathname.replace(/\/$/, '') === '/analyze';
+  document.body.classList.toggle('analyze-mode', isAnalyze);
+  document.body.classList.toggle('home-mode', !isAnalyze);
+  document.getElementById('navHome')?.classList.toggle('active', !isAnalyze);
+  document.getElementById('navAnalyze')?.classList.toggle('active', isAnalyze);
+  if (isAnalyze) switchSection('overview');
+}
+
+// â”€â”€ File input (folder upload) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+document.getElementById('fileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected files'));
+document.getElementById('folderFileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected folder'));
+document.getElementById('excelInput').addEventListener('change', importTeamExcel);
+
+function openReplayPicker(event) {
+  if (event?.target?.closest('button')) return;
+  document.getElementById('fileInput').click();
+}
+
+async function uploadReplaySelection(e, sourceLabel) {
+  const files = [...e.target.files].filter(isReplayFile);
+  if (!files.length) { toast(`No .wotbreplay files found in ${sourceLabel}`,'err'); return; }
+  await uploadReplayFiles(files);
+  e.target.value = '';
+}
+
+async function importTeamExcel(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  setVeil(true, 'Importing team Excel...');
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+  try {
+    const response = await fetch(`${API}/api/team-db/import`, {method:'POST', body:fd});
+    const json = await response.json();
+    if (!response.ok || json.error) {
+      toast(json.error || 'Excel import failed', 'err');
+      return;
+    }
+    teamDatabase = json.players || [];
+    localStorage.setItem('blitzscrim.teamDatabase', JSON.stringify({
+      importedAt:new Date().toISOString(),
+      file:file.name,
+      players:teamDatabase
+    }));
+    updateTeamDatabaseStatus(file.name);
+    toast(`${teamDatabase.length} players imported from Excel`, 'ok');
+  } catch(err) {
+    toast('Excel import error: ' + err.message, 'err');
+  } finally {
+    setVeil(false);
+    e.target.value = '';
+  }
+}
+
+function restoreTeamDatabase() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('blitzscrim.teamDatabase') || 'null');
+    teamDatabase = stored?.players || [];
+    updateTeamDatabaseStatus(stored?.file);
+  } catch(e) {
+    teamDatabase = [];
+    updateTeamDatabaseStatus();
+  }
+}
+
+function updateTeamDatabaseStatus(fileName='') {
+  const el = document.getElementById('teamDbStatus');
+  if (!el) return;
+  el.innerHTML = teamDatabase.length
+    ? `<strong>${teamDatabase.length}</strong> players loaded${fileName ? ` from ${esc(fileName)}` : ''}`
+    : 'No team database loaded';
+}
+
+async function uploadReplayFiles(files) {
+  setVeil(true, `Uploading ${files.length} replays...`);
 
   const fd = new FormData();
   files.forEach(f => fd.append('files', f, f.name));
@@ -485,22 +1179,181 @@ document.getElementById('fileInput').addEventListener('change', async e => {
     });
 
     if (json.error) { toast(json.error, 'err'); return; }
-    applyResults(json);
-    toast(`${ourData.length + enemyData.length} players loaded from ${json.processed} replays`, 'ok');
+    if (liveSession.active) {
+      addToLiveSession(json);
+      applyResults(sessionResult());
+      toast(`Added ${json.processed} replay${json.processed!==1?'s':''} to session`, 'ok');
+    } else {
+      applyResults(json);
+      toast(`${ourData.length + enemyData.length} players loaded from ${json.processed} replays`, 'ok');
+    }
+    refreshPublicStats();
   } catch(e) {
     toast('Upload error: ' + e.message, 'err');
   } finally {
     setVeil(false);
     setTimeout(() => { prog.classList.remove('show'); fill.style.width='0%'; }, 600);
-    e.target.value = ''; // reset so same folder can be re-uploaded
   }
-});
+}
 
-// ── Generate from path ─────────────────────────────────────
+function setupDropZone() {
+  const zone = document.getElementById('dropZone');
+  if (!zone) return;
+  ['dragenter','dragover'].forEach(eventName => zone.addEventListener(eventName, e => {
+    e.preventDefault();
+    zone.classList.add('drag');
+  }));
+  ['dragleave','drop'].forEach(eventName => zone.addEventListener(eventName, e => {
+    e.preventDefault();
+    zone.classList.remove('drag');
+  }));
+  zone.addEventListener('drop', e => {
+    const allFiles = [...e.dataTransfer.files];
+    const replayFiles = allFiles.filter(isReplayFile);
+    if (replayFiles.length !== allFiles.length) toast('Only .wotbreplay files are accepted', 'err');
+    uploadReplayFiles(replayFiles, 'dropped files');
+  });
+}
+
+function isReplayFile(file) {
+  return file.name.toLowerCase().endsWith('.wotbreplay');
+}
+
+function emptyLiveSession() {
+  return {
+    active:false,
+    mode:'scrim',
+    uploads:0,
+    startedAt:null,
+    our_team:[],
+    enemy_team:[],
+    processed:0,
+    discovered:0,
+    errors:[]
+  };
+}
+
+function setAnalysisMode(mode) {
+  analysisMode = mode;
+  if (liveSession.active) liveSession.mode = mode;
+  document.getElementById('modeScrim').classList.toggle('active', mode === 'scrim');
+  document.getElementById('modeIndividual').classList.toggle('active', mode === 'individual');
+  document.getElementById('sessionControls')?.classList.toggle('hidden', mode !== 'individual');
+  updateSessionUi();
+  if (ourData.length || enemyData.length) renderAnalytics();
+}
+
+function startLiveSession() {
+  liveSession = emptyLiveSession();
+  liveSession.active = true;
+  liveSession.mode = analysisMode;
+  liveSession.startedAt = new Date().toISOString();
+  saveLiveSession();
+  updateSessionUi();
+  toast('Session started. Upload each replay after the match.', 'ok');
+}
+
+function finishLiveSession() {
+  if (!liveSession.active && !liveSession.processed) {
+    toast('No active session to finish', 'err');
+    return;
+  }
+  liveSession.active = false;
+  saveLiveSession();
+  applyResults(sessionResult());
+  switchSection('analytics');
+  updateSessionUi();
+  toast('Session finished. Summary and objectives are ready.', 'ok');
+}
+
+function addToLiveSession(result) {
+  liveSession.mode = analysisMode;
+  liveSession.uploads += 1;
+  liveSession.processed += result.processed || 0;
+  liveSession.discovered += result.discovered || result.processed || 0;
+  liveSession.errors = [...liveSession.errors, ...(result.errors || [])];
+  liveSession.our_team = mergePlayerRows(liveSession.our_team, result.our_team || []);
+  liveSession.enemy_team = mergePlayerRows(liveSession.enemy_team, result.enemy_team || []);
+  saveLiveSession();
+  updateSessionUi();
+}
+
+function sessionResult() {
+  return {
+    our_team:bprAdrSort([...liveSession.our_team]),
+    enemy_team:bprAdrSort([...liveSession.enemy_team]),
+    processed:liveSession.processed,
+    discovered:liveSession.discovered || liveSession.processed,
+    errors:liveSession.errors || [],
+    mode:liveSession.mode,
+    uploads:liveSession.uploads
+  };
+}
+
+function mergePlayerRows(existing, incoming) {
+  const byId = new Map(existing.map(row => [String(row.account_id || row.nickname), {...row}]));
+  incoming.forEach(row => {
+    const key = String(row.account_id || row.nickname);
+    const current = byId.get(key);
+    byId.set(key, current ? mergePlayerRow(current, row) : {...row});
+  });
+  return bprAdrSort([...byId.values()]);
+}
+
+function mergePlayerRow(a, b) {
+  const battlesA = Number(a.battles) || 0;
+  const battlesB = Number(b.battles) || 0;
+  const battles = battlesA + battlesB;
+  const merged = {...a, nickname:b.nickname || a.nickname, battles};
+  ['HT','MT','LT','TD','frags','shots','hits','pens'].forEach(k => merged[k] = (Number(a[k]) || 0) + (Number(b[k]) || 0));
+  ['ADR','KPR','DE','assist','blocked','iPoints','sPoints','Firepower','AIM','Support','Supremacy','BPR'].forEach(k => {
+    merged[k] = battles ? round2(((Number(a[k]) || 0) * battlesA + (Number(b[k]) || 0) * battlesB) / battles) : 0;
+  });
+  merged.AccH = merged.shots ? round2((merged.hits / merged.shots) * 100) : 0;
+  merged.AccP = merged.hits ? round2((merged.pens / merged.hits) * 100) : 0;
+  merged.main_tank = battlesB >= battlesA ? (b.main_tank || a.main_tank) : (a.main_tank || b.main_tank);
+  return merged;
+}
+
+function saveLiveSession() {
+  localStorage.setItem('blitzscrim.liveSession', JSON.stringify(liveSession));
+}
+
+function restoreLiveSession() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('blitzscrim.liveSession') || 'null');
+    if (stored && (stored.active || stored.processed)) {
+      liveSession = {...emptyLiveSession(), ...stored};
+      analysisMode = liveSession.mode || 'scrim';
+      setAnalysisMode(analysisMode);
+      if (liveSession.processed) applyResults(sessionResult());
+    } else {
+      setAnalysisMode(analysisMode);
+    }
+  } catch(e) {
+    liveSession = emptyLiveSession();
+    setAnalysisMode(analysisMode);
+  }
+  updateSessionUi();
+}
+
+function updateSessionUi() {
+  const active = liveSession.active;
+  const hasSaved = !!liveSession.processed;
+  document.getElementById('finishSessionBtn').disabled = !active && !hasSaved;
+  document.getElementById('startSessionBtn').textContent = active ? 'Restart' : 'Start Session';
+  const modeLabel = analysisMode === 'scrim' ? 'Scrim' : 'Individual';
+  const status = active ? 'Recording' : (hasSaved ? 'Saved' : 'No active session');
+  document.getElementById('sessionMeta').innerHTML = hasSaved || active
+    ? `<strong>${status}</strong> · ${modeLabel} · ${liveSession.processed || 0} replays · ${liveSession.uploads || 0} uploads`
+    : 'No active session';
+}
+
+// Generate from path â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function generatePath() {
   const folder = document.getElementById('folderInput').value.trim();
   if (!folder) { toast('Enter a folder path','err'); return; }
-  setVeil(true, 'Processing replays…');
+  setVeil(true, 'Processing replays...');
   try {
     const r = await fetch(`${API}/api/process`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -508,17 +1361,30 @@ async function generatePath() {
     });
     const j = await r.json();
     if (!r.ok) { toast(j.error || 'Server error','err'); return; }
-    applyResults(j);
+    if (liveSession.active) {
+      addToLiveSession(j);
+      applyResults(sessionResult());
+    } else {
+      applyResults(j);
+    }
+    refreshPublicStats();
     toast(`${ourData.length + enemyData.length} players loaded from ${j.processed} replays`,'ok');
   } catch(e) {
-    toast('Cannot reach backend. Is app.py running?','err');
+    toast('Cannot reach backend. Is the server running?','err');
   } finally { setVeil(false); }
 }
 
-// ── Apply JSON results ─────────────────────────────────────
+// â”€â”€ Apply JSON results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function applyResults(j) {
   ourData   = j.our_team   || [];
   enemyData = j.enemy_team || [];
+  lastSession = {
+    processed:j.processed || 0,
+    discovered:j.discovered || j.processed || 0,
+    errors:j.errors || [],
+    mode:j.mode || analysisMode,
+    uploads:j.uploads || 1
+  };
 
   // summary strip
   document.getElementById('strip').style.display = 'flex';
@@ -527,12 +1393,15 @@ function applyResults(j) {
   set('sEnemyPlayers', enemyData.length);
   set('sOurBpr',       avgF(ourData,   'BPR'));
   set('sEnemyBpr',     avgF(enemyData, 'BPR'));
-  set('sOurBest',      ourData[0]?.nickname ?? '—');
+  set('sOurBest',      ourData[0]?.nickname ?? '-');
   set('sErr',          j.errors?.length || 0);
 
   if (j.errors?.length) {
     document.getElementById('errPanel').classList.add('show');
-    document.getElementById('errList').textContent = j.errors.join('\n');
+    document.getElementById('errList').textContent = j.errors.map(formatError).join('\n');
+  } else {
+    document.getElementById('errPanel').classList.remove('show');
+    document.getElementById('errList').textContent = '';
   }
 
   // unlock sidebar items
@@ -540,29 +1409,36 @@ function applyResults(j) {
   document.getElementById('sbEnemyTeam').classList.remove('dim');
   document.getElementById('secTabs').style.display = 'flex';
   document.getElementById('btnExport').disabled = false;
+  document.getElementById('btnExportPanel').disabled = false;
+  document.getElementById('clearBtn').style.display = 'inline-flex';
 
   buildDD('our');
   buildDD('enemy');
   renderOverview();
+  renderAnalytics();
   switchSection('overview');
 }
 
-// ── Section switching ──────────────────────────────────────
+// â”€â”€ Section switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function switchSection(sec) {
   curSection = sec;
 
   // sidebar
   document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
-  const sbMap = {overview: 0, our: 1, enemy: 2};
-  document.querySelectorAll('.sb-item')[sbMap[sec]]?.classList.add('active');
+  document.querySelector(`.sb-item[data-section="${sec}"]`)?.classList.add('active');
+
+  document.getElementById('navHome')?.classList.toggle('active', document.body.classList.contains('home-mode'));
+  document.getElementById('navAnalyze')?.classList.toggle('active', document.body.classList.contains('analyze-mode'));
 
   // tabs
   ['tabOverview','tabOur','tabEnemy'].forEach(id => document.getElementById(id).classList.remove('active'));
   const tabMap = {overview:'tabOverview', our:'tabOur', enemy:'tabEnemy'};
-  document.getElementById(tabMap[sec]).classList.add('active');
+  if (tabMap[sec]) document.getElementById(tabMap[sec]).classList.add('active');
 
   // panels
   document.getElementById('secOverview').style.display  = sec==='overview' ? 'block'  : 'none';
+  document.getElementById('secAnalytics').style.display = sec==='analytics' ? 'block' : 'none';
+  document.getElementById('secSettings').style.display  = sec==='settings' ? 'block' : 'none';
   document.getElementById('toolbarOur').style.display   = sec==='our'      ? 'flex'   : 'none';
   document.getElementById('taOur').style.display        = sec==='our'      ? 'block'  : 'none';
   document.getElementById('toolbarEnemy').style.display = sec==='enemy'    ? 'flex'   : 'none';
@@ -570,9 +1446,11 @@ function switchSection(sec) {
 
   if (sec === 'our')   renderTable('our');
   if (sec === 'enemy') renderTable('enemy');
+  if (sec === 'analytics') renderAnalytics();
+  if (sec === 'settings') refreshHealth(true);
 }
 
-// ── Overview (two-team cards, BPR+ADR sorted) ─────────────
+// â”€â”€ Overview (two-team cards, BPR+ADR sorted) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderOverview() {
   const sorted_our   = bprAdrSort([...ourData]);
   const sorted_enemy = bprAdrSort([...enemyData]);
@@ -589,7 +1467,8 @@ function ovRow(p, rank) {
   const in2 = String(p.nickname||'?').slice(0,2).toUpperCase();
   const cls  = bprClass(p.BPR);
   const rkCls = rank<=3 ? `r${rank}` : '';
-  return `<div class="ov-row">
+  const playerId = escAttr(p.account_id);
+  return `<div class="ov-row" role="button" tabindex="0" data-player-id="${playerId}" onclick="openPlayerModal(this.dataset.playerId)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlayerModal(this.dataset.playerId)}">
     <span class="ov-rank ${rkCls}">${rank}</span>
     <div class="ov-avatar">${esc(in2)}</div>
     <div class="ov-info">
@@ -608,7 +1487,191 @@ function ovRow(p, rank) {
   </div>`;
 }
 
-// ── Detail table ───────────────────────────────────────────
+function findPlayer(accountId) {
+  const id = String(accountId);
+  return [...ourData, ...enemyData].find(p => String(p.account_id) === id);
+}
+
+function openPlayerModal(accountId) {
+  const p = findPlayer(accountId);
+  if (!p) return;
+
+  const battles = Number(p.battles) || 0;
+  set('playerModalTitle', p.nickname || 'Player details');
+  set('playerModalSub', `${p.main_tank || 'Unknown tank'} - ${battles} battle${battles === 1 ? '' : 's'}`);
+
+  document.getElementById('playerKpis').innerHTML = [
+    modalKpi('BPR 2.0', p.BPR),
+    modalKpi('ADR', p.ADR),
+    modalKpi('KPR', p.KPR),
+    modalKpi('Battles', battles)
+  ].join('');
+
+  document.getElementById('playerBars').innerHTML = [
+    modalBar('BPR', p.BPR, 1.5),
+    modalBar('ADR', p.ADR, 3500),
+    modalBar('Kills / battle', p.KPR, 3),
+    modalBar('Accuracy', p.ACCH, 100, '%'),
+    modalBar('Pen rate', p.ACCP, 100, '%'),
+    modalBar('Support', p.assist, Math.max(1, maxMetric('assist')))
+  ].join('');
+
+  document.getElementById('playerModal')?.classList.add('show');
+}
+
+function closePlayerModal() {
+  document.getElementById('playerModal')?.classList.remove('show');
+}
+
+function modalKpi(label, value) {
+  return `<div class="player-kpi"><div class="player-kpi-k">${esc(label)}</div><div class="player-kpi-v">${esc(value ?? '-')}</div></div>`;
+}
+
+function modalBar(label, value, max, suffix='') {
+  const n = Number(value) || 0;
+  const pct = Math.max(0, Math.min(100, (n / Math.max(1, Number(max) || 1)) * 100));
+  return `<div class="player-bar-row">
+    <div class="player-bar-k">${esc(label)}</div>
+    <div class="player-bar-track"><div class="player-bar-fill" style="width:${pct}%"></div></div>
+    <div class="player-bar-v">${esc(value ?? '-')}${suffix}</div>
+  </div>`;
+}
+
+function maxMetric(key) {
+  return Math.max(0, ...[...ourData, ...enemyData].map(p => Number(p[key]) || 0));
+}
+
+function renderAnalytics() {
+  const hasData = ourData.length || enemyData.length;
+  document.getElementById('analyticsEmpty').style.display = hasData ? 'none' : 'block';
+  document.getElementById('analyticsContent').style.display = hasData ? 'block' : 'none';
+  if (!hasData) return;
+
+  const ourBpr = avgNum(ourData, 'BPR');
+  const enemyBpr = avgNum(enemyData, 'BPR');
+  const ourAdr = avgNum(ourData, 'ADR');
+  const enemyAdr = avgNum(enemyData, 'ADR');
+  const bprEdge = ourBpr - enemyBpr;
+  const adrEdge = ourAdr - enemyAdr;
+  const allPlayers = bprAdrSort([...ourData, ...enemyData]);
+  const best = allPlayers[0];
+  const replayHealth = lastSession.discovered ? Math.round((lastSession.processed / lastSession.discovered) * 100) : 100;
+
+  set('mBprEdge', signed(bprEdge));
+  set('mBprEdgeSub', bprEdge >= 0 ? 'Our team leads' : 'Enemy team leads');
+  set('mAdrEdge', signed(adrEdge));
+  set('mAdrEdgeSub', adrEdge >= 0 ? 'Damage pressure advantage' : 'Damage pressure deficit');
+  set('mBestPlayer', best?.nickname || '-');
+  set('mBestPlayerSub', best ? `BPR ${best.BPR}  -  ADR ${best.ADR}` : '-');
+  set('mReplayHealth', `${replayHealth}%`);
+  set('mReplayHealthSub', `${lastSession.processed}/${lastSession.discovered || lastSession.processed} parsed  -  ${lastSession.errors.length} errors`);
+
+  drawGroupedBars('chartAverages', [
+    {label:'BPR', our:ourBpr, enemy:enemyBpr},
+    {label:'ADR / 1000', our:ourAdr / 1000, enemy:enemyAdr / 1000},
+    {label:'KPR', our:avgNum(ourData, 'KPR'), enemy:avgNum(enemyData, 'KPR')},
+    {label:'AccH / 100', our:avgNum(ourData, 'AccH') / 100, enemy:avgNum(enemyData, 'AccH') / 100},
+  ]);
+  drawTypeBars('chartTypes', ['HT','MT','LT','TD'].map(k => ({label:k, our:sumNum(ourData,k), enemy:sumNum(enemyData,k)})));
+  drawTopBars('chartTopBpr', allPlayers.slice(0, 7).map(p => ({label:p.nickname, value:p.BPR, team:ourData.includes(p) ? 'our' : 'enemy'})));
+  document.getElementById('aiSummary').textContent = buildSessionSummary({ourBpr, enemyBpr, ourAdr, enemyAdr, best, replayHealth});
+}
+
+function buildSessionSummary(ctx) {
+  const lines = [];
+  const mode = lastSession.mode || analysisMode;
+  const bprDiff = ctx.ourBpr - ctx.enemyBpr;
+  const adrDiff = ctx.ourAdr - ctx.enemyAdr;
+  lines.push(`${mode === 'scrim' ? 'Scrim' : 'Individual'} session: ${lastSession.processed} replay${lastSession.processed!==1?'s':''}, ${lastSession.uploads || 1} upload${(lastSession.uploads || 1)!==1?'s':''}.`);
+
+  if (mode === 'individual') {
+    const focus = bprAdrSort([...ourData])[0] || ctx.best;
+    if (focus) {
+      lines.push(`${focus.nickname}: ${focus.BPR} BPR, ${focus.ADR} ADR, ${focus.KPR} KPR on ${focus.main_tank}.`);
+      lines.push(`Next target: keep ADR above ${Math.ceil((Number(focus.ADR) || 0) * 1.08)} while holding accuracy near ${focus.AccH || 0}% hits and ${focus.AccP || 0}% pens.`);
+      lines.push(Number(focus.Support) < Number(focus.Firepower)
+        ? 'Objective: add more crossfire and tracking value; support is the easiest growth lever for this profile.'
+        : 'Objective: maintain support value, then push early damage without bleeding HP first.');
+    }
+  } else {
+    lines.push(bprDiff >= 0
+      ? `Team edge: +${bprDiff.toFixed(2)} BPR over the opponent side.`
+      : `Team gap: -${Math.abs(bprDiff).toFixed(2)} BPR against the opponent side.`);
+    lines.push(adrDiff >= 0
+      ? `Damage pressure is ahead by ${adrDiff.toFixed(0)} ADR on average.`
+      : `Damage pressure is behind by ${Math.abs(adrDiff).toFixed(0)} ADR; review opening trades and focus fire.`);
+    if (ctx.best) lines.push(`Standout: ${ctx.best.nickname}, ${ctx.best.BPR} BPR and ${ctx.best.ADR} ADR on ${ctx.best.main_tank}.`);
+    lines.push(bprDiff >= 0
+      ? 'Next objective: keep the same structure and reduce isolated deaths in the first minute.'
+      : 'Next objective: define focus calls earlier and avoid split damage across multiple targets.');
+  }
+
+  const topType = topTankType([...ourData, ...enemyData]);
+  if (topType) lines.push(`Most used class: ${topType.label}, ${topType.value} recorded battles.`);
+  if (lastSession.errors.length) lines.push(`${lastSession.errors.length} replay${lastSession.errors.length!==1?'s':''} failed parsing; review the error panel before treating the session as complete.`);
+  return lines.join('\n');
+}
+
+function drawGroupedBars(id, rows) {
+  const canvas = document.getElementById(id), ctx = canvas.getContext('2d');
+  clearCanvas(ctx, canvas);
+  const max = Math.max(1, ...rows.flatMap(r => [r.our, r.enemy]));
+  const left = 46, top = 22, barW = 26, gap = 62, base = canvas.height - 38, h = canvas.height - 70;
+  rows.forEach((r, i) => {
+    const x = left + i * (barW * 2 + gap);
+    drawBar(ctx, x, base, barW, h * r.our / max, '#FF5500');
+    drawBar(ctx, x + barW + 5, base, barW, h * r.enemy / max, '#4B8EF5');
+    label(ctx, r.label, x - 12, canvas.height - 14, '#9E9E9E', 11);
+  });
+  legend(ctx, [['Our','#FF5500'],['Enemy','#4B8EF5']]);
+}
+
+function drawTypeBars(id, rows) {
+  const canvas = document.getElementById(id), ctx = canvas.getContext('2d');
+  clearCanvas(ctx, canvas);
+  const max = Math.max(1, ...rows.flatMap(r => [r.our, r.enemy]));
+  rows.forEach((r, i) => {
+    const y = 36 + i * 42;
+    label(ctx, r.label, 18, y + 13, '#FFFFFF', 12);
+    drawHBar(ctx, 60, y, 180 * r.our / max, '#FF5500');
+    drawHBar(ctx, 250, y, 180 * r.enemy / max, '#4B8EF5');
+    label(ctx, String(r.our), 64 + 180 * r.our / max, y + 13, '#9E9E9E', 11);
+    label(ctx, String(r.enemy), 254 + 180 * r.enemy / max, y + 13, '#9E9E9E', 11);
+  });
+  legend(ctx, [['Our','#FF5500'],['Enemy','#4B8EF5']]);
+}
+
+function drawTopBars(id, rows) {
+  const canvas = document.getElementById(id), ctx = canvas.getContext('2d');
+  clearCanvas(ctx, canvas);
+  const max = Math.max(1, ...rows.map(r => r.value));
+  rows.forEach((r, i) => {
+    const y = 28 + i * 25;
+    label(ctx, trimLabel(r.label, 16), 16, y + 12, '#9E9E9E', 11);
+    drawHBar(ctx, 150, y, 300 * r.value / max, r.team === 'our' ? '#FF5500' : '#4B8EF5');
+    label(ctx, r.value.toFixed(2), 456, y + 12, '#FFFFFF', 11);
+  });
+}
+
+function clearCanvas(ctx, canvas) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#1F1F1F';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+function drawBar(ctx, x, base, w, h, color){ ctx.fillStyle=color; ctx.fillRect(x, base - h, w, h); }
+function drawHBar(ctx, x, y, w, color){ ctx.fillStyle=color; ctx.fillRect(x, y, w, 16); }
+function label(ctx, text, x, y, color, size){ ctx.fillStyle=color; ctx.font=`${size}px Inter, sans-serif`; ctx.fillText(text, x, y); }
+function legend(ctx, items){ items.forEach((it,i)=>{ctx.fillStyle=it[1];ctx.fillRect(370+i*68,10,10,10);label(ctx,it[0],384+i*68,19,'#9E9E9E',11);}); }
+function avgNum(arr,k){ return arr.length ? arr.reduce((s,p)=>s+(Number(p[k])||0),0)/arr.length : 0; }
+function sumNum(arr,k){ return arr.reduce((s,p)=>s+(Number(p[k])||0),0); }
+function signed(n){ return `${n>=0?'+':''}${n.toFixed(2)}`; }
+function trimLabel(s,n){ s=String(s||''); return s.length>n ? s.slice(0,n-1)+'...' : s; }
+function topTankType(players){
+  const values = ['HT','MT','LT','TD'].map(label => ({label, value:sumNum(players,label)})).sort((a,b)=>b.value-a.value);
+  return values[0]?.value ? values[0] : null;
+}
+
+// â”€â”€ Detail table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderTable(team) {
   const data    = team==='our' ? ourData : enemyData;
   const cols    = team==='our' ? COLS_OUR : COLS_ENEMY;
@@ -634,7 +1697,7 @@ function renderTable(team) {
 
   thEl.innerHTML = `<tr>${vc.map(c=>`
     <th class="${ss.k===c.k?'sorted':''}" onclick="doSort('${team}','${c.k}')">
-      ${c.h}<span class="sarr">${ss.k===c.k?(ss.a?'↑':'↓'):'↕'}</span>
+      ${c.h}<span class="sarr">${ss.k===c.k?(ss.a?'^':'v'):'-'}</span>
     </th>`).join('')}</tr>`;
 
   if (!rows.length) {
@@ -654,7 +1717,7 @@ function doSort(team, k) {
   renderTable(team);
 }
 
-// ── Cell renderer ──────────────────────────────────────────
+// â”€â”€ Cell renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function cell(c, p, rank) {
   const v = c.k==='_rank' ? rank : p[c.k];
   switch(c.fmt) {
@@ -675,12 +1738,12 @@ function cell(c, p, rank) {
       const pct = Math.min(100,v||0);
       return `<div class="acc-cell"><div class="acc-bg"><div class="acc-fill" style="width:${pct}%"></div></div><span class="acc-v">${v}%</span></div>`;
     }
-    case 'm': return `<span class="td-m">${v??'—'}</span>`;
-    default:  return `<span class="td-n">${v??'—'}</span>`;
+    case 'm': return `<span class="td-m">${v??'-'}</span>`;
+    default:  return `<span class="td-n">${v??'-'}</span>`;
   }
 }
 
-// ── Column dropdown ────────────────────────────────────────
+// â”€â”€ Column dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildDD(team) {
   const cols = team==='our' ? COLS_OUR : COLS_ENEMY;
   const id   = team==='our' ? 'ddOurMenu' : 'ddEnemyMenu';
@@ -705,10 +1768,10 @@ document.addEventListener('click', e => {
   });
 });
 
-// ── Export ─────────────────────────────────────────────────
+// â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function exportXlsx() {
   if (!ourData.length && !enemyData.length) return;
-  setVeil(true, 'Generating Excel…');
+  setVeil(true, 'Generating Excel...');
   try {
     const r = await fetch(`${API}/api/export`, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -719,37 +1782,149 @@ async function exportXlsx() {
     const url  = URL.createObjectURL(blob);
     Object.assign(document.createElement('a'),{href:url,download:'results.xlsx'}).click();
     URL.revokeObjectURL(url);
-    toast('Excel exported — two sheets: Our Team + Enemy Team','ok');
+    toast('Excel exported - two sheets: Our Team + Enemy Team','ok');
   } catch(e) { toast('Export error: '+e.message,'err'); }
   finally { setVeil(false); }
 }
 
-// ── Clear ──────────────────────────────────────────────────
+async function refreshHealth(showPanel=false) {
+  const pill = document.getElementById('sysPill');
+  const txt = document.getElementById('sysTxt');
+  pill.className = 'sys-pill';
+  txt.textContent = 'Checking';
+  try {
+    const response = await fetch(`${API}/api/health`);
+    const health = await response.json();
+    applyHealth(health, showPanel);
+  } catch(e) {
+    pill.className = 'sys-pill err';
+    txt.textContent = 'Offline';
+    document.getElementById('healthPanel').classList.add('show');
+    setHealthValue('hParser', 'Unavailable', false);
+    setHealthValue('hTankDb', 'Unknown', false);
+    set('hUpload', '-');
+    set('hPath', 'Backend unreachable');
+  }
+}
+
+async function refreshPublicStats() {
+  try {
+    const response = await fetch(`${API}/api/public-stats`);
+    const stats = await response.json();
+    animateStat('globalReplays', stats.replays || 0);
+    animateStat('globalPlayers', stats.players || 0);
+    animateStat('globalSessions', stats.sessions || 0);
+  } catch(e) {
+    set('globalReplays', '-');
+    set('globalPlayers', '-');
+    set('globalSessions', '-');
+  }
+}
+
+function applyHealth(health, showPanel=false) {
+  const pill = document.getElementById('sysPill');
+  const txt = document.getElementById('sysTxt');
+  const ok = !!health.ok;
+  pill.className = `sys-pill ${ok ? 'ok' : 'err'}`;
+  txt.textContent = ok ? 'Ready' : 'Needs setup';
+
+  setHealthValue('hParser', health.checks?.parser ? 'Ready' : 'Missing', health.checks?.parser);
+  setHealthValue('hTankDb', health.checks?.tank_db ? `${health.tank_count || 0} tanks` : 'Missing', health.checks?.tank_db);
+  set('hUpload', `${health.max_upload_mb || 0} MB`);
+  set('hPath', health.parser || 'Not found');
+  set('uploadLimits', `Up to ${health.max_upload_files || 200} files · ${health.max_upload_mb || 0} MB total · .wotbreplay only`);
+  document.querySelectorAll('.local-only').forEach(el => el.style.display = health.public_mode ? 'none' : '');
+  document.querySelector('.page-sub').textContent = 'Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.';
+  set('setParser', health.checks?.parser ? 'Ready' : 'Missing');
+  set('setTankDb', health.checks?.tank_db ? `${health.tank_count || 0} tanks loaded` : 'Missing');
+  set('setUpload', `${health.max_upload_mb || 0} MB`);
+  set('setFileLimit', `${health.max_upload_files || 200} replay files`);
+  set('setStorage', `${health.max_temp_upload_dirs || 20} temp sessions · ${Math.round((health.upload_ttl_seconds || 1800) / 60)} min TTL`);
+  set('setPath', health.parser || 'Not found');
+
+  document.getElementById('healthPanel').classList.remove('show');
+}
+
+function setHealthValue(id, text, ok) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.classList.toggle('ok', !!ok);
+  el.classList.toggle('err', !ok);
+}
+
+async function copySessionSummary() {
+  const text = document.getElementById('aiSummary')?.textContent?.trim();
+  if (!text || text === '-') { toast('No session summary available', 'err'); return; }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Summary copied', 'ok');
+  } catch(e) {
+    toast('Clipboard unavailable', 'err');
+  }
+}
+
+// â”€â”€ Clear â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function clearAll() {
   ourData=[]; enemyData=[];
+  lastSession = {processed:0, discovered:0, errors:[], mode:analysisMode, uploads:0};
+  liveSession = emptyLiveSession();
+  localStorage.removeItem('blitzscrim.liveSession');
+  updateSessionUi();
   document.getElementById('strip').style.display='none';
   document.getElementById('secTabs').style.display='none';
   document.getElementById('secOverview').style.display='none';
+  document.getElementById('secAnalytics').style.display='none';
+  document.getElementById('secSettings').style.display='none';
   document.getElementById('toolbarOur').style.display='none';
   document.getElementById('taOur').style.display='none';
   document.getElementById('toolbarEnemy').style.display='none';
   document.getElementById('taEnemy').style.display='none';
   document.getElementById('errPanel').classList.remove('show');
   document.getElementById('btnExport').disabled=true;
+  document.getElementById('btnExportPanel').disabled=true;
+  document.getElementById('clearBtn').style.display='none';
   document.getElementById('sbOurTeam').classList.add('dim');
   document.getElementById('sbEnemyTeam').classList.add('dim');
   ['searchOur','searchEnemy','folderInput'].forEach(id=>document.getElementById(id).value='');
+  renderAnalytics();
+  switchSection('overview');
 }
 
-// ── Helpers ────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function bprAdrSort(arr) {
   return arr.sort((a,b) => b.BPR!==a.BPR ? b.BPR-a.BPR : b.ADR-a.ADR);
 }
 function bprClass(v) { return v>=1.1?'elite':v>=0.9?'high':v>=0.7?'mid':'low'; }
-function avgF(arr,k){ return arr.length?(arr.reduce((s,p)=>s+(p[k]||0),0)/arr.length).toFixed(2):'—'; }
+function avgF(arr,k){ return arr.length?(arr.reduce((s,p)=>s+(p[k]||0),0)/arr.length).toFixed(2):'-'; }
+function round2(n){ return Math.round((Number(n) || 0) * 100) / 100; }
+function compactInt(n){ return new Intl.NumberFormat('en', {notation:n>=10000?'compact':'standard', maximumFractionDigits:1}).format(n); }
+function animateStat(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const end = Math.max(0, Number(target) || 0);
+  const start = Number(el.dataset.value || 0);
+  el.dataset.value = String(end);
+  if (start === end) {
+    el.textContent = compactInt(end);
+    return;
+  }
+  const duration = 900;
+  const started = performance.now();
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  const tick = now => {
+    const p = Math.min(1, (now - started) / duration);
+    const value = Math.round(start + (end - start) * ease(p));
+    el.textContent = compactInt(value);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
 function set(id,v){ const el=document.getElementById(id); if(el) el.textContent=v; }
-function setVeil(v,msg='Processing…'){ document.getElementById('veil').classList.toggle('on',v); document.getElementById('veilMsg').textContent=msg; }
+function setVeil(v,msg='Processing...'){ document.getElementById('veil').classList.toggle('on',v); document.getElementById('veilMsg').textContent=msg; }
 function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return esc(s).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+function formatError(err){ return typeof err === 'string' ? err : `${err.file || 'unknown'}: ${err.reason || 'parse failed'}`; }
 
 function toast(msg, type='inf') {
   const ico={
@@ -766,3 +1941,4 @@ function toast(msg, type='inf') {
 </script>
 </body>
 </html>
+

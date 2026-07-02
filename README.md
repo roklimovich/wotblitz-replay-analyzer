@@ -2,6 +2,85 @@
 
 A Python tool that parses World of Tanks Blitz replay files and generates an Excel spreadsheet with per-player performance statistics and BPR 2.0 ratings for your team.
 
+## Web version
+
+This repository now includes a Flask web app in `app1.py` with a browser UI in `static/index.html`.
+
+The web app works like this:
+
+- upload one or more `.wotbreplay` files from the browser;
+- choose Scrim or Individual analysis, with an optional live session that can be updated after each match;
+- the backend runs `wotbreplay-inspector battle-results`;
+- results are aggregated into allied and enemy team tables;
+- the browser can export the current result set as `results.xlsx`.
+
+The backend is split into focused modules:
+
+- `app1.py`: HTTP routes, uploads, health checks;
+- `replay_parser.py`: `wotbreplay-inspector` integration;
+- `stats.py`: replay aggregation and BPR calculations;
+- `excel_export.py`: Excel workbook generation.
+- `usage_stats.py`: public homepage counters.
+
+### Run locally on Windows
+
+Install the `wotbreplay-inspector` binary first. The Python package name listed by older docs may not be available on PyPI, so the reliable route is Rust/Cargo:
+
+```powershell
+cargo install wotbreplay-inspector
+```
+
+Then start the web app:
+
+```powershell
+.\run_local.ps1
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
+Health check:
+
+```text
+http://127.0.0.1:5000/api/health
+```
+
+### Run with Docker
+
+Docker builds the Rust replay parser into the image, so the host machine does not need Cargo:
+
+```bash
+docker build -t wotblitz-replay-web .
+docker run --rm -p 5000:5000 wotblitz-replay-web
+```
+
+Then open:
+
+```text
+http://localhost:5000
+```
+
+### Deployment notes
+
+This cannot be deployed as a purely static site because replay parsing needs server-side execution of `wotbreplay-inspector`. Use a platform that supports Docker containers or a Python web service with the parser binary installed.
+
+Recommended environment variables:
+
+```env
+PORT=5000
+HOST=0.0.0.0
+MAX_UPLOAD_MB=512
+MAX_UPLOAD_FILES=200
+MAX_TEMP_UPLOAD_DIRS=20
+UPLOAD_TTL_SECONDS=1800
+PUBLIC_MODE=1
+WOTBREPLAY_INSPECTOR_BIN=wotbreplay-inspector
+USAGE_STATS_FILE=/opt/blitzscrim/data/usage_stats.json
+```
+
 ---
 
 ## Dependencies
