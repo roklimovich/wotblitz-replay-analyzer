@@ -1,5 +1,6 @@
 import json
 import os
+import secrets
 import shutil
 import tempfile
 import time
@@ -26,6 +27,8 @@ MAX_TEMP_UPLOAD_DIRS = int(os.getenv("MAX_TEMP_UPLOAD_DIRS", "20"))
 UPLOAD_TTL_SECONDS = int(os.getenv("UPLOAD_TTL_SECONDS", "1800"))
 UPLOAD_TMP_ROOT = Path(os.getenv("UPLOAD_TMP_ROOT", tempfile.gettempdir())) / "blitzscrim_uploads"
 USAGE_STATS_FILE = Path(os.getenv("USAGE_STATS_FILE", BASE_DIR / "data" / "usage_stats.json"))
+SHARED_REPORTS_DIR = Path(os.getenv("SHARED_REPORTS_DIR", BASE_DIR / "data" / "shared_reports"))
+SHARE_TTL_SECONDS = int(os.getenv("SHARE_TTL_SECONDS", "86400"))
 PUBLIC_MODE = os.getenv("PUBLIC_MODE", "0") == "1"
 
 app = Flask(__name__, static_folder="static")
@@ -51,6 +54,11 @@ def analyze():
     return send_from_directory("static", "index.html")
 
 
+@app.route("/s/<share_id>")
+def shared_report_page(share_id):
+    return send_from_directory("static", "index.html")
+
+
 @app.route("/privacy")
 def privacy():
     return send_from_directory("static", "privacy.html")
@@ -58,6 +66,7 @@ def privacy():
 
 @app.route("/api/health")
 def health():
+    cleanup_shared_reports()
     parser_path = parser.path()
     checks = {
         "parser": bool(parser_path),
@@ -72,6 +81,7 @@ def health():
         "max_upload_files": MAX_UPLOAD_FILES,
         "max_temp_upload_dirs": MAX_TEMP_UPLOAD_DIRS,
         "upload_ttl_seconds": UPLOAD_TTL_SECONDS,
+        "share_ttl_seconds": SHARE_TTL_SECONDS,
         "public_mode": PUBLIC_MODE,
     })
 
@@ -156,6 +166,59 @@ def import_team_db():
     return jsonify({"players": players, "count": len(players)})
 
 
+@app.route("/api/share", methods=["POST"])
+def create_share():
+    cleanup_shared_reports()
+    data = request.json or {}
+    if not data.get("our_team") and not data.get("enemy_team"):
+        return jsonify({"error": "No report loaded to share"}), 400
+
+    share_id = secrets.token_urlsafe(8).replace("-", "").replace("_", "")[:12]
+    now = int(time.time())
+    payload = {
+        "id": share_id,
+        "created_at": now,
+        "expires_at": now + SHARE_TTL_SECONDS,
+        "report": {
+            "our_team": data.get("our_team", []),
+            "enemy_team": data.get("enemy_team", []),
+            "processed": int(data.get("processed") or 0),
+            "discovered": int(data.get("discovered") or data.get("processed") or 0),
+            "errors": data.get("errors", []),
+            "mode": data.get("mode") or "scrim",
+            "uploads": int(data.get("uploads") or 1),
+        },
+    }
+
+    SHARED_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    report_path = shared_report_path(share_id)
+    tmp_path = report_path.with_suffix(".tmp")
+    tmp_path.write_text(json.dumps(payload), encoding="utf-8")
+    tmp_path.replace(report_path)
+    return jsonify({
+        "id": share_id,
+        "url": request.host_url.rstrip("/") + f"/s/{share_id}",
+        "expires_at": payload["expires_at"],
+        "ttl_seconds": SHARE_TTL_SECONDS,
+    })
+
+
+@app.route("/api/share/<share_id>")
+def get_share(share_id):
+    cleanup_shared_reports()
+    if not valid_share_id(share_id):
+        return jsonify({"error": "Invalid share link"}), 400
+    report_path = shared_report_path(share_id)
+    if not report_path.exists():
+        return jsonify({"error": "Share link expired or not found"}), 404
+
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    if payload.get("expires_at", 0) <= int(time.time()):
+        report_path.unlink(missing_ok=True)
+        return jsonify({"error": "Share link expired"}), 410
+    return jsonify(payload)
+
+
 def save_replay_uploads(files, target_dir):
     saved = 0
     for uploaded_file in files:
@@ -195,6 +258,28 @@ def cleanup_upload_storage(max_age_seconds=UPLOAD_TTL_SECONDS):
 
     for _, path in sorted(remaining)[:len(remaining) - MAX_TEMP_UPLOAD_DIRS]:
         shutil.rmtree(path, ignore_errors=True)
+
+
+def valid_share_id(share_id):
+    return share_id.isalnum() and 8 <= len(share_id) <= 24
+
+
+def shared_report_path(share_id):
+    return SHARED_REPORTS_DIR / f"{share_id}.json"
+
+
+def cleanup_shared_reports():
+    if not SHARED_REPORTS_DIR.exists():
+        return
+
+    now = int(time.time())
+    for path in SHARED_REPORTS_DIR.glob("*.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if payload.get("expires_at", 0) <= now:
+                path.unlink(missing_ok=True)
+        except (OSError, json.JSONDecodeError):
+            path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

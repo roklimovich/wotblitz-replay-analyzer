@@ -828,7 +828,9 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Export Excel
               </button>
+              <button class="btn btn-ghost" id="btnSharePanel" disabled onclick="createShareLink()">Share 24h link</button>
               <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()">Import team Excel</button>
+              <div class="db-status" id="shareStatus">No shared link created</div>
               <div class="db-status" id="teamDbStatus">No team database loaded</div>
               <div class="session-bar hidden" id="sessionControls">
                 <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()">Start Session</button>
@@ -1067,6 +1069,7 @@ document.addEventListener('DOMContentLoaded', initPageMode);
 document.addEventListener('DOMContentLoaded', refreshHealth);
 document.addEventListener('DOMContentLoaded', refreshPublicStats);
 document.addEventListener('DOMContentLoaded', setupDropZone);
+document.addEventListener('DOMContentLoaded', loadSharedReport);
 document.addEventListener('DOMContentLoaded', restoreLiveSession);
 document.addEventListener('DOMContentLoaded', restoreTeamDatabase);
 document.addEventListener('keydown', e => {
@@ -1077,12 +1080,18 @@ window.addEventListener('pagehide', () => {
 });
 
 function initPageMode() {
-  const isAnalyze = location.pathname.replace(/\/$/, '') === '/analyze';
+  const cleanPath = location.pathname.replace(/\/$/, '');
+  const isAnalyze = cleanPath === '/analyze' || cleanPath.startsWith('/s/');
   document.body.classList.toggle('analyze-mode', isAnalyze);
   document.body.classList.toggle('home-mode', !isAnalyze);
   document.getElementById('navHome')?.classList.toggle('active', !isAnalyze);
   document.getElementById('navAnalyze')?.classList.toggle('active', isAnalyze);
   if (isAnalyze) switchSection('overview');
+}
+
+function shareIdFromPath() {
+  const match = location.pathname.match(/^\/s\/([A-Za-z0-9]{8,24})\/?$/);
+  return match ? match[1] : '';
 }
 
 // â”€â”€ File input (folder upload) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -1320,6 +1329,7 @@ function saveLiveSession() {
 }
 
 function restoreLiveSession() {
+  if (shareIdFromPath()) return;
   try {
     const stored = JSON.parse(localStorage.getItem('blitzscrim.liveSession') || 'null');
     if (stored && (stored.active || stored.processed)) {
@@ -1410,6 +1420,7 @@ function applyResults(j) {
   document.getElementById('secTabs').style.display = 'flex';
   document.getElementById('btnExport').disabled = false;
   document.getElementById('btnExportPanel').disabled = false;
+  document.getElementById('btnSharePanel').disabled = false;
   document.getElementById('clearBtn').style.display = 'inline-flex';
 
   buildDD('our');
@@ -1787,6 +1798,52 @@ async function exportXlsx() {
   finally { setVeil(false); }
 }
 
+async function createShareLink() {
+  if (!ourData.length && !enemyData.length) return;
+  setVeil(true, 'Creating share link...');
+  try {
+    const response = await fetch(`${API}/api/share`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        our_team:ourData,
+        enemy_team:enemyData,
+        processed:lastSession.processed || 0,
+        discovered:lastSession.discovered || lastSession.processed || 0,
+        errors:lastSession.errors || [],
+        mode:lastSession.mode || analysisMode,
+        uploads:lastSession.uploads || 1
+      })
+    });
+    const json = await response.json();
+    if (!response.ok || json.error) {
+      toast(json.error || 'Share link failed', 'err');
+      return;
+    }
+    await copyText(json.url);
+    const expires = json.expires_at ? new Date(json.expires_at * 1000).toLocaleString('en') : '24 hours';
+    set('shareStatus', `Copied - expires ${expires}`);
+    toast('Temporary link copied', 'ok');
+  } catch(e) {
+    toast('Share error: ' + e.message, 'err');
+  } finally {
+    setVeil(false);
+  }
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const input = document.createElement('input');
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('copy');
+  input.remove();
+}
+
 async function refreshHealth(showPanel=false) {
   const pill = document.getElementById('sysPill');
   const txt = document.getElementById('sysTxt');
@@ -1804,6 +1861,29 @@ async function refreshHealth(showPanel=false) {
     setHealthValue('hTankDb', 'Unknown', false);
     set('hUpload', '-');
     set('hPath', 'Backend unreachable');
+  }
+}
+
+async function loadSharedReport() {
+  const shareId = shareIdFromPath();
+  if (!shareId) return;
+  setVeil(true, 'Loading shared report...');
+  try {
+    const response = await fetch(`${API}/api/share/${shareId}`);
+    const json = await response.json();
+    if (!response.ok || json.error) {
+      toast(json.error || 'Shared report unavailable', 'err');
+      set('shareStatus', 'Shared link expired or unavailable');
+      return;
+    }
+    applyResults(json.report || {});
+    const expires = json.expires_at ? new Date(json.expires_at * 1000).toLocaleString('en') : 'soon';
+    set('shareStatus', `Shared report - expires ${expires}`);
+    toast('Shared report loaded', 'ok');
+  } catch(e) {
+    toast('Cannot load shared report', 'err');
+  } finally {
+    setVeil(false);
   }
 }
 
@@ -1883,6 +1963,8 @@ function clearAll() {
   document.getElementById('errPanel').classList.remove('show');
   document.getElementById('btnExport').disabled=true;
   document.getElementById('btnExportPanel').disabled=true;
+  document.getElementById('btnSharePanel').disabled=true;
+  set('shareStatus', 'No shared link created');
   document.getElementById('clearBtn').style.display='none';
   document.getElementById('sbOurTeam').classList.add('dim');
   document.getElementById('sbEnemyTeam').classList.add('dim');
