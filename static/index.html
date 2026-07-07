@@ -44,7 +44,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .nav-tab.active{color:var(--tx)}
 .nav-tab.dim{opacity:.35;pointer-events:none}
 .nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
-#btnExport{display:none!important}
+.nav-action{display:none}
+body.analyze-mode.has-session .nav-action{display:inline-flex}
+body.shared-mode #btnSharePanel{display:none}
 .sys-pill{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--br);border-radius:var(--rs);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:600}
 .sys-dot{width:7px;height:7px;border-radius:50%;background:var(--yw);box-shadow:0 0 0 3px rgba(255,184,0,.12)}
 .sys-pill.ok .sys-dot{background:var(--gn);box-shadow:0 0 0 3px rgba(31,214,85,.12)}
@@ -125,6 +127,13 @@ body.analyze-mode .layout{display:flex}
 .btn-upload:hover{color:var(--tx);border-color:var(--or);background:var(--or-dim)}
 .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
 #fileInput,#folderFileInput,#excelInput{display:none}
+.metric-help{position:relative;display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
+.info-dot{width:15px;height:15px;border:1px solid var(--br2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--sf3);color:var(--tx2);font:800 10px/1 'Inter',sans-serif;cursor:help;padding:0;flex-shrink:0}
+.info-dot:hover,.info-dot:focus-visible{border-color:var(--or);color:var(--or);outline:none}
+.info-tip{position:absolute;left:0;top:calc(100% + 8px);z-index:90;width:280px;padding:10px 12px;border:1px solid var(--br2);border-radius:var(--r);background:#101010;box-shadow:0 14px 36px rgba(0,0,0,.45);color:var(--tx2);font-size:12px;font-weight:500;line-height:1.5;text-transform:none;letter-spacing:0;white-space:normal;opacity:0;visibility:hidden;transform:translateY(-3px);transition:.12s;pointer-events:none}
+.metric-help:hover .info-tip,.metric-help:focus-within .info-tip{opacity:1;visibility:visible;transform:translateY(0)}
+th .metric-help{display:inline-flex}
+th .info-tip{left:auto;right:0}
 
 /* â”€â”€ CONTENT â”€â”€ */
 .content{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto}
@@ -138,6 +147,18 @@ body.analyze-mode .page-hdr{padding:24px 28px 20px}
 body.analyze-mode .hero-grid{grid-template-columns:1fr;grid-template-areas:"upload"}
 body.analyze-mode .hero-copy,body.analyze-mode .report-preview{display:none}
 body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+body.analyze-mode .upload-grid{grid-template-columns:180px minmax(360px,1fr);align-items:start}
+body.analyze-mode .upload-grid>div:first-child{background:#151515;border:1px solid var(--br);border-radius:var(--r);padding:12px}
+body.analyze-mode .mode-switch{background:var(--bg);border:1px solid var(--br);border-radius:var(--r);padding:4px;gap:4px;margin-bottom:0}
+body.analyze-mode .mode-btn{border-color:transparent;background:transparent;min-height:36px}
+body.analyze-mode .mode-btn.active{background:var(--or-dim);border-color:var(--or);color:var(--tx)}
+body.analyze-mode.has-session .page-hdr{padding:16px 28px}
+body.analyze-mode.has-session .upload-card{background:rgba(18,18,18,.74)}
+body.analyze-mode.has-session .upload-grid{grid-template-columns:180px minmax(360px,1fr)}
+body.analyze-mode.has-session .drop-zone{min-height:92px;padding:16px}
+body.analyze-mode.has-session .upload-card-title{display:none}
+body.analyze-mode.has-session:not(.recording-session) .upload-card{display:none}
+body.analyze-mode.has-session:not(.recording-session) .new-analyze-card{display:flex}
 .hero-copy{grid-area:copy;display:flex;flex-direction:column;justify-content:space-between;min-height:320px;padding:8px 0}
 .eyebrow{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.8px;color:var(--or);margin-bottom:10px}
 .page-title{font-size:58px;font-weight:800;color:var(--tx);letter-spacing:0;line-height:.95;margin-bottom:14px}
@@ -174,21 +195,26 @@ body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .upload-card{grid-area:upload;background:rgba(18,18,18,.86);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:16px;box-shadow:0 18px 55px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.04)}
 .upload-card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:10px}
 .upload-grid{display:grid;grid-template-columns:180px minmax(360px,1fr) 220px;gap:14px;align-items:stretch}
+.new-analyze-card{display:none;grid-area:upload;align-items:center;justify-content:space-between;gap:14px;background:rgba(18,18,18,.78);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.new-analyze-copy{min-width:0}
+.new-analyze-title{font-size:13px;font-weight:800;color:var(--tx)}
+.new-analyze-sub{font-size:12px;color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.shared-mode .upload-card-title,body.shared-mode .mode-switch,body.shared-mode .drop-zone,body.shared-mode #excelInput,body.shared-mode #teamDbStatus,body.shared-mode #sessionControls{display:none!important}
+body.shared-mode .upload-card{padding:12px 16px}
+body.shared-mode .upload-grid{display:block}
 .mode-switch{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
 .mode-btn{border:1px solid var(--br);background:var(--sf2);color:var(--tx2);border-radius:var(--rs);padding:9px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
 .mode-btn.active{border-color:var(--or);background:var(--or-dim);color:var(--tx)}
-.session-bar{display:grid;grid-template-columns:1fr;gap:8px;align-content:start}
+.session-bar{display:grid;grid-template-columns:1fr;gap:8px;align-content:start;margin-top:10px}
 .session-bar.hidden{display:none}
 .session-meta{grid-column:1 / -1;font-size:12px;color:var(--tx3);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .session-meta strong{color:var(--tx)}
-.action-panel{display:grid;gap:8px;align-content:start}
-.action-panel-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3)}
-.action-panel .btn{justify-content:center;width:100%}
+.hidden-status{display:none}
 .db-status{font-size:12px;color:var(--tx3);line-height:1.4}
 .db-status strong{color:var(--tx)}
 .import-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
 .import-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.drop-zone{border:1px dashed var(--br2);border-radius:var(--r);background:#151515;padding:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:border-color .15s,background .15s;min-height:94px;cursor:pointer}
+.drop-zone{border:1px dashed var(--br2);border-radius:var(--r);background:#151515;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:border-color .15s,background .15s;min-height:92px;cursor:pointer}
 .drop-zone.drag{border-color:var(--or);background:var(--or-dim)}
 .drop-zone:focus-visible{outline:1px solid var(--or);outline-offset:2px}
 .drop-main{display:flex;align-items:center;gap:12px;min-width:0}
@@ -218,12 +244,7 @@ body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .sp-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--tx3);margin-bottom:2px}
 .sp-val{font-size:19px;font-weight:700;color:var(--tx);line-height:1}
 .sp-val.ac{color:var(--or)}
-
-/* â”€â”€ SECTION TABS â”€â”€ */
-.sec-tabs{display:none;align-items:center;gap:0;padding:0 28px;background:var(--sf);border-bottom:1px solid var(--br);flex-shrink:0}
-.sec-tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;display:flex;align-items:center;gap:7px}
-.sec-tab:hover{color:var(--tx)}
-.sec-tab.active{color:var(--tx);border-bottom-color:var(--or)}
+body.analyze-mode.has-session .strip{border:1px solid var(--br);border-radius:var(--r);background:rgba(18,18,18,.55);padding:14px 16px;margin-top:14px;display:grid!important;grid-template-columns:repeat(7,minmax(92px,1fr));gap:14px}
 
 /* â”€â”€ OVERVIEW SECTION â”€â”€ */
 .section{display:none;padding:24px 28px 32px;flex:1}
@@ -242,7 +263,9 @@ body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .settings-k{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);margin-bottom:4px}
 .settings-v{font-size:13px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .empty-analytics{padding:48px 16px;text-align:center;color:var(--tx3)}
-.site-footer{margin-top:auto;border-top:1px solid var(--br);padding:14px 28px;background:var(--sf);color:var(--tx3);font-size:12px;line-height:1.5}
+.site-footer{margin-top:auto;border-top:1px solid var(--br);padding:12px 28px;background:var(--sf);color:var(--tx3);font-size:12px;line-height:1.5;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.footer-credit{min-width:0}
+.footer-status{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .site-footer a{color:var(--tx2);text-decoration:none;font-weight:600}
 .site-footer a:hover{color:var(--or)}
 
@@ -288,7 +311,7 @@ body.analyze-mode .upload-card{box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
   .match-wrap{grid-template-columns:1fr;gap:14px}
   .vs-col{display:none}
   .section,.table-area{padding:16px 14px 24px}
-  .site-footer{padding:14px;text-align:center}
+  .site-footer{padding:14px;text-align:center;flex-direction:column}
   .toolbar{padding:12px 14px}
   .table-card{overflow-x:auto}
   .strip{gap:18px}
@@ -372,8 +395,6 @@ thead{background:var(--sf2);border-bottom:1px solid var(--br)}
 th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3);cursor:pointer;user-select:none;transition:color .12s;white-space:nowrap}
 th:hover{color:var(--tx2)}
 th.sorted{color:var(--or)}
-.sarr{margin-left:4px;font-size:10px;opacity:.45}
-th.sorted .sarr{opacity:1}
 tbody tr{border-bottom:1px solid var(--br);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:rgba(255,255,255,.025)}
@@ -472,6 +493,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   body.analyze-mode .page-hdr{padding:12px;background:#171717}
   body.analyze-mode .hero-grid{display:block}
   body.analyze-mode .upload-card{padding:12px;border-radius:var(--r)}
+  body.analyze-mode .new-analyze-card{margin:0;padding:12px;align-items:flex-start;flex-direction:column}
   body.analyze-mode .upload-card-title{margin-bottom:12px}
   body.analyze-mode .upload-grid{display:grid;grid-template-columns:1fr;gap:12px}
   body.analyze-mode .mode-switch{grid-template-columns:1fr 1fr;margin-bottom:0}
@@ -479,15 +501,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   body.analyze-mode .drop-zone{min-height:132px;padding:14px;gap:14px}
   body.analyze-mode .drop-main{align-items:flex-start}
   body.analyze-mode .drop-actions{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
-  body.analyze-mode .drop-actions .btn,body.analyze-mode .action-panel .btn{min-height:42px}
-  body.analyze-mode .action-panel{border-top:1px solid var(--br);padding-top:12px}
+  body.analyze-mode .drop-actions .btn{min-height:42px}
   body.analyze-mode .session-bar{grid-template-columns:1fr;gap:8px}
   body.analyze-mode .strip{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px 12px;margin:0;border-top:1px solid var(--br);background:rgba(18,18,18,.45)}
   body.analyze-mode .strip[style*="flex"]{display:grid!important}
+  body.analyze-mode.has-session .strip{grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 0 0;padding:12px}
   body.analyze-mode .sp-val{font-size:17px;min-width:0;overflow:hidden;text-overflow:ellipsis}
-  body.analyze-mode .sec-tabs{overflow-x:auto;padding:0 12px;scrollbar-width:none}
-  body.analyze-mode .sec-tabs::-webkit-scrollbar{display:none}
-  body.analyze-mode .sec-tab{flex:0 0 auto;padding:13px 12px;white-space:nowrap}
   body.analyze-mode .section{padding:14px 12px 22px}
   body.analyze-mode .match-wrap{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:0}
   body.analyze-mode .team-header{padding:12px}
@@ -505,8 +524,8 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   body.analyze-mode .search-inp{width:100%;min-height:38px}
   body.analyze-mode .cnt-lbl{width:100%;text-align:left}
   body.analyze-mode .table-area{padding:12px 12px 22px;overflow:hidden}
-  body.analyze-mode .table-card{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  body.analyze-mode table{min-width:980px}
+  body.analyze-mode .table-card{overflow:visible}
+  body.analyze-mode table{min-width:0}
   body.analyze-mode th,body.analyze-mode td{padding:10px 11px}
   body.analyze-mode .site-footer{padding:12px;text-align:center}
 }
@@ -519,6 +538,20 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   body.analyze-mode .strip{grid-template-columns:1fr}
   body.analyze-mode .toolbar-l{grid-template-columns:1fr}
   body.analyze-mode .dd-wrap .btn{width:100%;justify-content:center}
+  body.analyze-mode thead{display:none}
+  body.analyze-mode tbody,body.analyze-mode tr,body.analyze-mode td{display:block;width:100%}
+  body.analyze-mode tbody{display:grid;gap:10px}
+  body.analyze-mode tbody tr{border:1px solid var(--br);border-radius:var(--r);background:var(--sf);padding:8px}
+  body.analyze-mode tbody tr:hover{background:var(--sf)}
+  body.analyze-mode td{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:center;border-bottom:1px solid var(--br);padding:8px 6px}
+  body.analyze-mode td:last-child{border-bottom:none}
+  body.analyze-mode td::before{content:attr(data-label);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3)}
+  body.analyze-mode td[data-key="_rank"]{display:none}
+  body.analyze-mode td[data-key="nickname"]{grid-template-columns:1fr;padding-top:4px}
+  body.analyze-mode td[data-key="nickname"]::before{display:none}
+  body.analyze-mode .player-cell{gap:9px}
+  body.analyze-mode .pname{font-size:14px}
+  body.analyze-mode .tank-tag{max-width:100%;justify-self:start}
 }
 
 /* upload progress bar */
@@ -573,12 +606,13 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     </a>
   </div>
   <div class="nav-right">
-    <button class="sys-pill" id="sysPill" onclick="refreshHealth(true)" title="System status">
-      <span class="sys-dot"></span><span id="sysTxt">Checking</span>
+    <button class="btn btn-ghost nav-action" id="btnSharePanel" disabled onclick="createShareLink()" title="Share 24h link" style="font-size:12px;padding:7px 12px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
+      Share
     </button>
-    <button class="btn btn-ghost" id="btnExport" disabled onclick="exportXlsx()" style="font-size:12px;padding:7px 14px">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export Excel
+    <button class="btn btn-or nav-action" id="btnExportPanel" disabled onclick="exportXlsx()" title="Export Excel" style="font-size:12px;padding:7px 12px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M21 3l-9 9"/><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/></svg>
+      Export
     </button>
   </div>
 </nav>
@@ -690,16 +724,16 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   <aside class="sidebar">
     <div class="side-head">
       <div class="side-title">Analyzer</div>
-      <div class="side-sub">Upload replays, review teams, export reports.</div>
+      <div class="side-sub">Import, review, share.</div>
     </div>
     <div class="sb-lbl">Workflow</div>
     <button class="sb-item active" data-section="overview" onclick="switchSection('overview')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-      Match Review
+      Review
     </button>
     <button class="sb-item" id="sbAnalytics" data-section="analytics" onclick="switchSection('analytics')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-      Reports
+      Charts
     </button>
     <div class="sb-lbl">Tables</div>
     <button class="sb-item dim" id="sbOurTeam" data-section="our" onclick="switchSection('our')">
@@ -784,12 +818,17 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         </div>
 
         <div class="upload-card">
-          <div class="upload-card-title">Analyze replays</div>
+          <div class="upload-card-title">Replay input</div>
           <div class="upload-grid">
             <div>
               <div class="mode-switch" aria-label="Analysis mode">
                 <button class="mode-btn active" id="modeScrim" onclick="setAnalysisMode('scrim')">Scrim</button>
                 <button class="mode-btn" id="modeIndividual" onclick="setAnalysisMode('individual')">Individual</button>
+              </div>
+              <div class="session-bar hidden" id="sessionControls">
+                <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()">Start Session</button>
+                <button class="btn btn-ghost" id="finishSessionBtn" onclick="finishLiveSession()" disabled>Finish</button>
+                <div class="session-meta" id="sessionMeta">No active session</div>
               </div>
               <div class="import-row">
                 <input class="f-input f-input-wide local-only" id="folderInput" type="text"
@@ -821,24 +860,18 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
                 <button class="link-btn" id="clearBtn" onclick="event.stopPropagation();clearAll()" style="display:none">Clear</button>
               </div>
             </div>
-
-            <div class="action-panel">
-              <div class="action-panel-title">Excel workflow</div>
-              <button class="btn btn-or" id="btnExportPanel" disabled onclick="exportXlsx()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Export Excel
-              </button>
-              <button class="btn btn-ghost" id="btnSharePanel" disabled onclick="createShareLink()">Share 24h link</button>
-              <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()">Import team Excel</button>
-              <div class="db-status" id="shareStatus">No shared link created</div>
-              <div class="db-status" id="teamDbStatus">No team database loaded</div>
-              <div class="session-bar hidden" id="sessionControls">
-                <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()">Start Session</button>
-                <button class="btn btn-ghost" id="finishSessionBtn" onclick="finishLiveSession()" disabled>Finish</button>
-                <div class="session-meta" id="sessionMeta">No active session</div>
-              </div>
-            </div>
           </div>
+          <div class="hidden-status">
+            <div id="shareStatus">No shared link created</div>
+            <div id="teamDbStatus">No team database loaded</div>
+          </div>
+        </div>
+        <div class="new-analyze-card">
+          <div class="new-analyze-copy">
+            <div class="new-analyze-title">Analysis loaded</div>
+            <div class="new-analyze-sub">Start a new analysis to upload another replay set.</div>
+          </div>
+          <button class="btn btn-or" onclick="clearAll()">New Analyze</button>
         </div>
       </div>
 
@@ -855,8 +888,8 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <div><div class="sp-lbl">Replays</div><div class="sp-val" id="sReplays">-</div></div>
         <div><div class="sp-lbl">Our Players</div><div class="sp-val" id="sOurPlayers">-</div></div>
         <div><div class="sp-lbl">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">-</div></div>
-        <div><div class="sp-lbl">Our Avg BPR</div><div class="sp-val ac" id="sOurBpr">-</div></div>
-        <div><div class="sp-lbl">Enemy Avg BPR</div><div class="sp-val" id="sEnemyBpr">-</div></div>
+        <div><div class="sp-lbl metric-help">Our Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val ac" id="sOurBpr">-</div></div>
+        <div><div class="sp-lbl metric-help">Enemy Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val" id="sEnemyBpr">-</div></div>
         <div><div class="sp-lbl">Our Best</div><div class="sp-val ac" id="sOurBest">-</div></div>
         <div><div class="sp-lbl">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">-</div></div>
       </div>
@@ -868,22 +901,6 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       <div class="err-list" id="errList"></div>
     </div>
 
-    <!-- SECTION TABS -->
-    <div class="sec-tabs" id="secTabs">
-      <button class="sec-tab active" id="tabOverview" onclick="switchSection('overview')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Match Overview
-      </button>
-      <button class="sec-tab" id="tabOur" onclick="switchSection('our')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        Our Team
-      </button>
-      <button class="sec-tab" id="tabEnemy" onclick="switchSection('enemy')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Enemy Team
-      </button>
-    </div>
-
     <!-- â”€â”€ OVERVIEW SECTION â”€â”€ -->
     <div class="section" id="secOverview">
       <div class="match-wrap">
@@ -891,7 +908,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <div class="team-side">
           <div class="team-header">
             <span class="team-label-our">Our Team</span>
-            <span class="team-avg-bpr">Avg BPR <span id="ovOurAvg">-</span></span>
+            <span class="team-avg-bpr"><span class="metric-help">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovOurAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovOurList"></div>
         </div>
@@ -905,7 +922,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <div class="team-side">
           <div class="team-header">
             <span class="team-label-enemy">Enemy Team</span>
-            <span class="team-avg-bpr">Avg BPR <span id="ovEnemyAvg">-</span></span>
+            <span class="team-avg-bpr"><span class="metric-help">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovEnemyAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovEnemyList"></div>
         </div>
@@ -929,7 +946,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
           <div class="chart-box"><div class="panel-title">Team Averages</div><canvas id="chartAverages" width="520" height="220"></canvas></div>
           <div class="chart-box"><div class="panel-title">Tank Type Mix</div><canvas id="chartTypes" width="520" height="220"></canvas></div>
           <div class="chart-box"><div class="panel-title">Top BPR Players</div><canvas id="chartTopBpr" width="520" height="220"></canvas></div>
-          <div class="summary-box"><div class="panel-title">AI Session Summary</div><div class="summary-text" id="aiSummary">-</div></div>
+          <div class="summary-box"><div class="panel-title">Session Summary</div><div class="summary-text" id="aiSummary">-</div></div>
         </div>
       </div>
     </div>
@@ -948,6 +965,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         </div>
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost" onclick="refreshHealth(true)">Refresh System</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()">Import team Excel</button>
           <button class="btn btn-ghost" onclick="copySessionSummary()">Copy Summary</button>
         </div>
       </div>
@@ -1008,9 +1026,16 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     </div>
 
     <footer class="site-footer">
-      PerFORmance &middot; Based on the original WoT Blitz Replay Analyzer project by
-      <a href="https://github.com/roklimovich/wotblitz-replay-analyzer" target="_blank" rel="noopener noreferrer">roklimovich</a>.
-      <a href="/privacy">Privacy</a>
+      <div class="footer-credit">
+        PerFORmance &middot; Based on the original WoT Blitz Replay Analyzer project by
+        <a href="https://github.com/roklimovich/wotblitz-replay-analyzer" target="_blank" rel="noopener noreferrer">roklimovich</a>.
+        <a href="/privacy">Privacy</a>
+      </div>
+      <div class="footer-status">
+        <button class="sys-pill" id="sysPill" onclick="refreshHealth(true)" title="System status">
+          <span class="sys-dot"></span><span id="sysTxt">Checking</span>
+        </button>
+      </div>
     </footer>
 
   </div><!-- /content -->
@@ -1018,6 +1043,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 
 <script>
 const API = '';
+const BPR_HELP_TEXT = 'BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.';
 
 const COLS = [
   {k:'_rank',     h:'#',         vis:true,  fmt:'rank'},
@@ -1065,6 +1091,10 @@ let sortState = {
 };
 let curSection = 'overview';
 
+function metricHelp(label) {
+  return `<span class="metric-help">${label}<button class="info-dot" type="button" aria-label="What is BPR 2.0?" onclick="event.stopPropagation()">i</button><span class="info-tip">${BPR_HELP_TEXT}</span></span>`;
+}
+
 document.addEventListener('DOMContentLoaded', initPageMode);
 document.addEventListener('DOMContentLoaded', refreshHealth);
 document.addEventListener('DOMContentLoaded', refreshPublicStats);
@@ -1078,12 +1108,19 @@ document.addEventListener('keydown', e => {
 window.addEventListener('pagehide', () => {
   if (navigator.sendBeacon) navigator.sendBeacon(`${API}/api/session/close`, new Blob([], {type:'application/json'}));
 });
+window.addEventListener('beforeunload', e => {
+  if (!liveSession.active) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
 
 function initPageMode() {
   const cleanPath = location.pathname.replace(/\/$/, '');
   const isAnalyze = cleanPath === '/analyze' || cleanPath.startsWith('/s/');
+  const isShared = !!shareIdFromPath();
   document.body.classList.toggle('analyze-mode', isAnalyze);
   document.body.classList.toggle('home-mode', !isAnalyze);
+  document.body.classList.toggle('shared-mode', isShared);
   document.getElementById('navHome')?.classList.toggle('active', !isAnalyze);
   document.getElementById('navAnalyze')?.classList.toggle('active', isAnalyze);
   if (isAnalyze) switchSection('overview');
@@ -1350,8 +1387,13 @@ function restoreLiveSession() {
 function updateSessionUi() {
   const active = liveSession.active;
   const hasSaved = !!liveSession.processed;
-  document.getElementById('finishSessionBtn').disabled = !active && !hasSaved;
-  document.getElementById('startSessionBtn').textContent = active ? 'Restart' : 'Start Session';
+  document.body.classList.toggle('recording-session', active && analysisMode === 'individual');
+  const startBtn = document.getElementById('startSessionBtn');
+  const finishBtn = document.getElementById('finishSessionBtn');
+  startBtn.style.display = active ? 'none' : 'inline-flex';
+  finishBtn.style.display = active ? 'inline-flex' : 'none';
+  finishBtn.disabled = !active;
+  startBtn.textContent = hasSaved ? 'New Session' : 'Start Session';
   const modeLabel = analysisMode === 'scrim' ? 'Scrim' : 'Individual';
   const status = active ? 'Recording' : (hasSaved ? 'Saved' : 'No active session');
   document.getElementById('sessionMeta').innerHTML = hasSaved || active
@@ -1388,6 +1430,7 @@ async function generatePath() {
 function applyResults(j) {
   ourData   = j.our_team   || [];
   enemyData = j.enemy_team || [];
+  document.body.classList.add('has-session');
   lastSession = {
     processed:j.processed || 0,
     discovered:j.discovered || j.processed || 0,
@@ -1417,8 +1460,6 @@ function applyResults(j) {
   // unlock sidebar items
   document.getElementById('sbOurTeam').classList.remove('dim');
   document.getElementById('sbEnemyTeam').classList.remove('dim');
-  document.getElementById('secTabs').style.display = 'flex';
-  document.getElementById('btnExport').disabled = false;
   document.getElementById('btnExportPanel').disabled = false;
   document.getElementById('btnSharePanel').disabled = false;
   document.getElementById('clearBtn').style.display = 'inline-flex';
@@ -1440,11 +1481,6 @@ function switchSection(sec) {
 
   document.getElementById('navHome')?.classList.toggle('active', document.body.classList.contains('home-mode'));
   document.getElementById('navAnalyze')?.classList.toggle('active', document.body.classList.contains('analyze-mode'));
-
-  // tabs
-  ['tabOverview','tabOur','tabEnemy'].forEach(id => document.getElementById(id).classList.remove('active'));
-  const tabMap = {overview:'tabOverview', our:'tabOur', enemy:'tabEnemy'};
-  if (tabMap[sec]) document.getElementById(tabMap[sec]).classList.add('active');
 
   // panels
   document.getElementById('secOverview').style.display  = sec==='overview' ? 'block'  : 'none';
@@ -1708,7 +1744,7 @@ function renderTable(team) {
 
   thEl.innerHTML = `<tr>${vc.map(c=>`
     <th class="${ss.k===c.k?'sorted':''}" onclick="doSort('${team}','${c.k}')">
-      ${c.h}<span class="sarr">${ss.k===c.k?(ss.a?'^':'v'):'-'}</span>
+      ${c.k === 'BPR' ? metricHelp(c.h) : c.h}
     </th>`).join('')}</tr>`;
 
   if (!rows.length) {
@@ -1719,7 +1755,7 @@ function renderTable(team) {
   }
   emEl.style.display = 'none';
   cntEl.textContent = `${rows.length} player${rows.length!==1?'s':''}`;
-  tbEl.innerHTML = rows.map(p => `<tr>${vc.map(c=>`<td>${cell(c,p,rankMap[p.account_id])}</td>`).join('')}</tr>`).join('');
+  tbEl.innerHTML = rows.map(p => `<tr>${vc.map(c=>`<td data-label="${escAttr(c.h)}" data-key="${escAttr(c.k)}">${cell(c,p,rankMap[p.account_id])}</td>`).join('')}</tr>`).join('');
 }
 
 function doSort(team, k) {
@@ -1947,12 +1983,12 @@ async function copySessionSummary() {
 // â”€â”€ Clear â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function clearAll() {
   ourData=[]; enemyData=[];
+  document.body.classList.remove('has-session');
   lastSession = {processed:0, discovered:0, errors:[], mode:analysisMode, uploads:0};
   liveSession = emptyLiveSession();
   localStorage.removeItem('blitzscrim.liveSession');
   updateSessionUi();
   document.getElementById('strip').style.display='none';
-  document.getElementById('secTabs').style.display='none';
   document.getElementById('secOverview').style.display='none';
   document.getElementById('secAnalytics').style.display='none';
   document.getElementById('secSettings').style.display='none';
@@ -1961,7 +1997,6 @@ function clearAll() {
   document.getElementById('toolbarEnemy').style.display='none';
   document.getElementById('taEnemy').style.display='none';
   document.getElementById('errPanel').classList.remove('show');
-  document.getElementById('btnExport').disabled=true;
   document.getElementById('btnExportPanel').disabled=true;
   document.getElementById('btnSharePanel').disabled=true;
   set('shareStatus', 'No shared link created');
