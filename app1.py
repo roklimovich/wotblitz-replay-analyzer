@@ -29,6 +29,7 @@ UPLOAD_TMP_ROOT = Path(os.getenv("UPLOAD_TMP_ROOT", tempfile.gettempdir())) / "b
 USAGE_STATS_FILE = Path(os.getenv("USAGE_STATS_FILE", BASE_DIR / "data" / "usage_stats.json"))
 SHARED_REPORTS_DIR = Path(os.getenv("SHARED_REPORTS_DIR", BASE_DIR / "data" / "shared_reports"))
 SHARE_TTL_SECONDS = int(os.getenv("SHARE_TTL_SECONDS", "86400"))
+SHARE_TTL_OPTIONS = {86400, 259200, 604800}
 PUBLIC_MODE = os.getenv("PUBLIC_MODE", "0") == "1"
 
 app = Flask(__name__, static_folder="static")
@@ -82,6 +83,7 @@ def health():
         "max_temp_upload_dirs": MAX_TEMP_UPLOAD_DIRS,
         "upload_ttl_seconds": UPLOAD_TTL_SECONDS,
         "share_ttl_seconds": SHARE_TTL_SECONDS,
+        "share_ttl_options": sorted(SHARE_TTL_OPTIONS),
         "public_mode": PUBLIC_MODE,
     })
 
@@ -173,12 +175,18 @@ def create_share():
     if not data.get("our_team") and not data.get("enemy_team"):
         return jsonify({"error": "No report loaded to share"}), 400
 
+    ttl_seconds = int(data.get("ttl_seconds") or SHARE_TTL_SECONDS)
+    if ttl_seconds not in SHARE_TTL_OPTIONS:
+        return jsonify({"error": "Invalid share expiration"}), 400
+
     share_id = secrets.token_urlsafe(8).replace("-", "").replace("_", "")[:12]
     now = int(time.time())
     payload = {
         "id": share_id,
         "created_at": now,
-        "expires_at": now + SHARE_TTL_SECONDS,
+        "last_accessed_at": now,
+        "ttl_seconds": ttl_seconds,
+        "expires_at": now + ttl_seconds,
         "report": {
             "our_team": data.get("our_team", []),
             "enemy_team": data.get("enemy_team", []),
@@ -199,7 +207,7 @@ def create_share():
         "id": share_id,
         "url": request.host_url.rstrip("/") + f"/s/{share_id}",
         "expires_at": payload["expires_at"],
-        "ttl_seconds": SHARE_TTL_SECONDS,
+        "ttl_seconds": ttl_seconds,
     })
 
 
@@ -213,9 +221,19 @@ def get_share(share_id):
         return jsonify({"error": "Share link expired or not found"}), 404
 
     payload = json.loads(report_path.read_text(encoding="utf-8"))
-    if payload.get("expires_at", 0) <= int(time.time()):
+    now = int(time.time())
+    if payload.get("expires_at", 0) <= now:
         report_path.unlink(missing_ok=True)
         return jsonify({"error": "Share link expired"}), 410
+    ttl_seconds = int(payload.get("ttl_seconds") or SHARE_TTL_SECONDS)
+    if ttl_seconds not in SHARE_TTL_OPTIONS:
+        ttl_seconds = SHARE_TTL_SECONDS
+    payload["last_accessed_at"] = now
+    payload["ttl_seconds"] = ttl_seconds
+    payload["expires_at"] = now + ttl_seconds
+    tmp_path = report_path.with_suffix(".tmp")
+    tmp_path.write_text(json.dumps(payload), encoding="utf-8")
+    tmp_path.replace(report_path)
     return jsonify(payload)
 
 
