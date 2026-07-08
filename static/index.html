@@ -33,7 +33,7 @@
 html,body{height:100%}
 body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:14px;line-height:1.5;display:flex;flex-direction:column;min-height:100vh}
 
-/* â”€â”€ TOP NAV â”€â”€ */
+/*  TOP NAV  */
 .topnav{height:56px;background:var(--sf);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;flex-shrink:0}
 .logo{display:flex;align-items:center;gap:10px;margin-right:28px;text-decoration:none;flex-shrink:0}
 .logo-hex{width:28px;height:28px;background:var(--or);clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:flex;align-items:center;justify-content:center}
@@ -49,7 +49,7 @@ body.analyze-mode.has-session .nav-action{display:inline-flex}
 body.shared-mode #btnSharePanel{display:none}
 .sys-pill{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--br);border-radius:var(--rs);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:600}
 
-/* â”€â”€ LANGUAGE SWITCH â”€â”€ */
+/*  LANGUAGE SWITCH  */
 .lang-switch{display:inline-flex;align-items:center;height:30px;padding:3px;border:1px solid var(--br);border-radius:var(--rs);background:var(--bg);gap:2px;flex-shrink:0}
 .lang-btn{border:none;background:transparent;color:var(--tx2);font-size:11px;font-weight:700;letter-spacing:.3px;padding:0 9px;height:100%;border-radius:3px;cursor:pointer;transition:.15s;font-family:inherit}
 .lang-btn:hover:not(.active){color:var(--tx)}
@@ -59,7 +59,7 @@ body.shared-mode #btnSharePanel{display:none}
 .sys-pill.ok .sys-dot{background:var(--gn);box-shadow:0 0 0 3px rgba(31,214,85,.12)}
 .sys-pill.err .sys-dot{background:var(--rd);box-shadow:0 0 0 3px rgba(255,64,64,.12)}
 
-/* â”€â”€ LAYOUT â”€â”€ */
+/*  LAYOUT  */
 .layout{display:flex;flex:1;min-height:0;overflow:hidden}
 .home-main{display:none;flex:1;min-height:0;overflow-y:auto;background:var(--bg)}
 body:not(.home-mode):not(.analyze-mode) .layout{display:none}
@@ -110,7 +110,7 @@ body.analyze-mode .layout{display:flex}
 .demo-summary-v{font-size:12px;font-weight:800;color:var(--tx2);text-align:right}
 .demo-note{margin-top:14px;border:1px solid var(--br);border-radius:var(--rs);padding:12px;background:var(--bg);font-size:13px;color:var(--tx2);line-height:1.6}
 
-/* â”€â”€ SIDEBAR â”€â”€ */
+/*  SIDEBAR  */
 .sidebar{width:var(--nav);background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;padding:14px 10px;gap:4px;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
 .side-head{padding:10px 10px 14px;border-bottom:1px solid var(--br);margin-bottom:8px}
 .side-title{font-size:13px;font-weight:800;color:var(--tx);letter-spacing:.2px}
@@ -123,7 +123,7 @@ body.analyze-mode .layout{display:flex}
 .sb-item.dim{opacity:.35;pointer-events:none}
 .sb-ico{color:var(--tx3);flex-shrink:0;transition:color .12s}
 
-/* â”€â”€ BUTTONS â”€â”€ */
+/*  BUTTONS  */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--rs);font-family:'Inter',sans-serif;font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0}
 .btn-or{background:var(--or);color:#fff}
 .btn-or:hover{background:var(--or2)}
@@ -142,10 +142,10 @@ body.analyze-mode .layout{display:flex}
 th .metric-help{display:inline-flex}
 th .info-tip{left:auto;right:0}
 
-/* â”€â”€ CONTENT â”€â”€ */
+/*  CONTENT  */
 .content{flex:1;min-width:0;display:flex;flex-direction:column;overflow-y:auto}
 
-/* â”€â”€ PAGE HEADER â”€â”€ */
+/*  PAGE HEADER  */
 .page-hdr{position:relative;overflow:hidden;background:#171717;border-bottom:1px solid var(--br);padding:30px 28px 22px;flex-shrink:0}
 .page-hdr::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,85,0,.12),transparent 34%),linear-gradient(180deg,#202020 0%,#171717 52%,var(--sf) 100%);pointer-events:none}
 .page-hdr::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(90deg,rgba(0,0,0,.8),rgba(0,0,0,.18));pointer-events:none}
@@ -253,7 +253,7 @@ body.shared-mode .upload-grid{display:block}
 .sp-val.ac{color:var(--or)}
 body.analyze-mode.has-session .strip{border:1px solid var(--br);border-radius:var(--r);background:rgba(18,18,18,.55);padding:14px 16px;margin-top:14px;display:grid!important;grid-template-columns:repeat(7,minmax(92px,1fr));gap:14px}
 
-/* â”€â”€ OVERVIEW SECTION â”€â”€ */
+/*  OVERVIEW SECTION  */
 .section{display:none;padding:24px 28px 32px;flex:1}
 .section.visible{display:block}
 .panel-title{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:12px}
@@ -346,7 +346,7 @@ body.analyze-mode.has-session .strip{border:1px solid var(--br);border-radius:va
   .preview-list{grid-template-columns:1fr}
 }
 
-/* â”€â”€ MATCH OVERVIEW (two-team side by side) â”€â”€ */
+/*  MATCH OVERVIEW (two-team side by side)  */
 .match-wrap{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:start;margin-bottom:28px}
 .team-side{}
 .team-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r) var(--r) 0 0;border-bottom:none}
@@ -378,7 +378,7 @@ body.analyze-mode.has-session .strip{border:1px solid var(--br);border-radius:va
 .ov-bpr-val{font-size:13px;font-weight:700;color:var(--tx)}
 .ov-adr{font-size:11px;color:var(--tx3)}
 
-/* â”€â”€ TOOLBAR â”€â”€ */
+/*  TOOLBAR  */
 .toolbar{display:none;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid var(--br);gap:10px;flex-wrap:wrap;background:var(--sf);flex-shrink:0}
 .toolbar-l{display:flex;align-items:center;gap:8px}
 .search-wrap{position:relative}
@@ -394,7 +394,7 @@ body.analyze-mode.has-session .strip{border:1px solid var(--br);border-radius:va
 .dd-row:hover{background:var(--sf3);color:var(--tx)}
 .dd-row input{accent-color:var(--or);cursor:pointer;width:14px;height:14px}
 
-/* â”€â”€ DETAIL TABLE â”€â”€ */
+/*  DETAIL TABLE  */
 .table-area{display:none;padding:20px 28px 32px}
 .table-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r);overflow:hidden}
 table{width:100%;border-collapse:collapse;white-space:nowrap}
@@ -1055,7 +1055,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 <script>
 const API = '';
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ i18n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// i18n 
 const I18N = {
 en: {
   nav_home:'Home', nav_analyze:'Analyze', btn_share:'Share', btn_export:'Export',
@@ -1329,8 +1329,8 @@ function colKey(k) {
     iPoints:'col_ipoints', sPoints:'col_spoints', shots:'col_shots', hits:'col_hits', pens:'col_pens', account_id:'col_account_id',
   }[k] || k;
 }
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ /i18n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
+ //i18n 
 const BPR_HELP_TEXT = 'BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.';
 
 const COLS = [
@@ -1421,7 +1421,7 @@ function shareIdFromPath() {
   return match ? match[1] : '';
 }
 
-// â”€â”€ File input (folder upload) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// File input (folder upload)
 document.getElementById('fileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected files'));
 document.getElementById('folderFileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected folder'));
 document.getElementById('excelInput').addEventListener('change', importTeamExcel);
@@ -1691,7 +1691,7 @@ function updateSessionUi() {
     : t('session_meta_none');
 }
 
-// Generate from path â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Generate from path 
 async function generatePath() {
   const folder = document.getElementById('folderInput').value.trim();
   if (!folder) { toast(t('toast_enter_folder'),'err'); return; }
@@ -1716,7 +1716,7 @@ async function generatePath() {
   } finally { setVeil(false); }
 }
 
-// â”€â”€ Apply JSON results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Apply JSON results
 function applyResults(j) {
   ourData   = j.our_team   || [];
   enemyData = j.enemy_team || [];
@@ -1761,7 +1761,7 @@ function applyResults(j) {
   switchSection('overview');
 }
 
-// â”€â”€ Section switching â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Section switching
 function switchSection(sec) {
   curSection = sec;
 
@@ -1787,7 +1787,7 @@ function switchSection(sec) {
   if (sec === 'settings') refreshHealth(true);
 }
 
-// â”€â”€ Overview (two-team cards, BPR+ADR sorted) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Overview (two-team cards, BPR+ADR sorted) 
 function renderOverview() {
   const sorted_our   = bprAdrSort([...ourData]);
   const sorted_enemy = bprAdrSort([...enemyData]);
@@ -2009,7 +2009,7 @@ function topTankType(players){
   return values[0]?.value ? values[0] : null;
 }
 
-// â”€â”€ Detail table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Detail table 
 function renderTable(team) {
   const data    = team==='our' ? ourData : enemyData;
   const cols    = team==='our' ? COLS_OUR : COLS_ENEMY;
@@ -2055,7 +2055,7 @@ function doSort(team, k) {
   renderTable(team);
 }
 
-// â”€â”€ Cell renderer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Cell renderer
 function cell(c, p, rank) {
   const v = c.k==='_rank' ? rank : p[c.k];
   switch(c.fmt) {
@@ -2081,7 +2081,7 @@ function cell(c, p, rank) {
   }
 }
 
-// â”€â”€ Column dropdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Column dropdown
 function buildDD(team) {
   const cols = team==='our' ? COLS_OUR : COLS_ENEMY;
   const id   = team==='our' ? 'ddOurMenu' : 'ddEnemyMenu';
@@ -2106,7 +2106,7 @@ document.addEventListener('click', e => {
   });
 });
 
-// â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Export
 async function exportXlsx() {
   if (!ourData.length && !enemyData.length) return;
   setVeil(true, t('veil_generating_excel'));
@@ -2271,7 +2271,7 @@ async function copySessionSummary() {
   }
 }
 
-// â”€â”€ Clear â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Clear 
 function clearAll() {
   ourData=[]; enemyData=[];
   document.body.classList.remove('has-session');
@@ -2299,7 +2299,7 @@ function clearAll() {
   switchSection('overview');
 }
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Helpers
 function bprAdrSort(arr) {
   return arr.sort((a,b) => b.BPR!==a.BPR ? b.BPR-a.BPR : b.ADR-a.ADR);
 }
