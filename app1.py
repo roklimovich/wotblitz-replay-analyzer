@@ -65,6 +65,11 @@ def privacy():
     return send_from_directory("static", "privacy.html")
 
 
+@app.route("/bpr")
+def bpr_guide():
+    return send_from_directory("static", "bpr.html")
+
+
 @app.route("/api/health")
 def health():
     cleanup_shared_reports()

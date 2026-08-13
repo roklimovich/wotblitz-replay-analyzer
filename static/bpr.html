@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="How the BlitzScrim BPR 2.0 replay-performance rating is calculated and interpreted."/>
+<title>BPR 2.0 guide · BlitzScrim</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#121212;--sf:#1f1f1f;--sf2:#242424;--br:#313131;--or:#ff5500;--tx:#fff;--tx2:#b0b0b0;--tx3:#858585;--bl:#4b8ef5;--yw:#ffb800}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 Inter,Arial,sans-serif}.wrap{max-width:920px;margin:0 auto;padding:38px 20px 56px}.logo{display:flex;align-items:center;gap:10px;width:max-content;margin-bottom:34px;color:var(--tx);font-weight:800;text-decoration:none}.mark{width:30px;height:30px;background:var(--or);clip-path:polygon(50% 0%,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);display:grid;place-items:center}h1{font-size:34px;line-height:1.15;margin:0 0 12px}h2{font-size:20px;margin:0 0 10px}h3{font-size:15px;margin:0 0 6px}p{margin:0 0 14px;color:var(--tx2)}.lead{max-width:720px;font-size:17px}.accent{color:var(--or);font-weight:700}.section{margin-top:28px}.card{background:var(--sf);border:1px solid var(--br);border-radius:8px;padding:20px;margin-top:14px}.formula{overflow-x:auto;background:#101010;border:1px solid var(--br);border-radius:6px;padding:16px;color:#f1f1f1;font:14px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}.metric{padding:16px;background:var(--sf2);border:1px solid var(--br);border-radius:6px}.metric p:last-child{margin-bottom:0}.bands{width:100%;border-collapse:collapse;margin-top:10px}.bands th,.bands td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--br)}.bands th{font-size:11px;letter-spacing:.7px;text-transform:uppercase;color:var(--tx3)}.bands tr:last-child td{border-bottom:0}.badge{display:inline-block;min-width:48px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:800;text-align:center;color:#111}.elite{background:var(--or);color:#fff}.high{background:var(--bl);color:#fff}.mid{background:var(--yw)}.low{background:#777;color:#fff}ul{margin:8px 0 0;padding-left:20px;color:var(--tx2)}li{margin:5px 0}.note{border-left:3px solid var(--or);padding:12px 14px;background:rgba(255,85,0,.08);border-radius:0 6px 6px 0}.back{display:inline-block;margin-top:28px;color:var(--or);font-weight:700;text-decoration:none}@media(max-width:620px){.wrap{padding:28px 16px 44px}h1{font-size:29px}.grid{grid-template-columns:1fr}.card{padding:16px}.formula{font-size:12px;padding:12px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="logo" href="/"><span class="mark"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>BlitzScrim</a>
+  <h1>How BPR 2.0 works</h1>
+  <p class="lead">BPR 2.0 is a <span class="accent">replay performance rating</span>. It combines damage impact, accuracy, support and Supremacy-mode contribution into one number, so players can be compared within the analyzed replay session.</p>
+
+  <section class="section">
+    <h2>Reading your BPR value</h2>
+    <div class="card">
+      <p>A higher BPR means a stronger overall contribution in the selected replays. The analyzer uses these display bands:</p>
+      <table class="bands">
+        <thead><tr><th>BPR 2.0</th><th>Band</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>1.10 and above</td><td><span class="badge elite">Elite</span></td><td>Excellent overall impact in this session.</td></tr>
+          <tr><td>0.90–1.09</td><td><span class="badge high">High</span></td><td>Strong contribution; above the solid baseline.</td></tr>
+          <tr><td>0.70–0.89</td><td><span class="badge mid">Mid</span></td><td>Useful contribution, with room to improve one or more areas.</td></tr>
+          <tr><td>Below 0.70</td><td><span class="badge low">Low</span></td><td>Lower session impact according to the inputs below.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>The four parts of the rating</h2>
+    <div class="grid">
+      <article class="metric"><h3>Firepower</h3><p>Built from <b>ADR</b> (average damage) and <b>KPR</b> (kills per battle). Damage is the main driver; kills add a smaller bonus.</p></article>
+      <article class="metric"><h3>AIM</h3><p>Built from hit accuracy (<b>AccH</b>) and penetration accuracy (<b>AccP</b>). Accurate, penetrating shots raise it.</p></article>
+      <article class="metric"><h3>Support</h3><p>Built from <b>DE</b> (enemies damaged), assist damage and blocked damage. All three help, so a rounded contribution is rewarded.</p></article>
+      <article class="metric"><h3>Supremacy</h3><p>Built from average Supremacy points earned and seized. It matters when the replay mode provides those objective points.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Why firepower matters most</h2>
+    <div class="card">
+      <p>BPR does not simply average the four sub-ratings. Before the final scaling, its weights are <span class="accent">17 for Firepower</span>, 3 for AIM, 2 for Support and 3 for Supremacy. In practice, consistent damage and finishing power have the greatest effect; the other categories distinguish how efficiently and helpfully that damage was delivered.</p>
+      <div class="formula">BPR 2.0 = (1 / 76) ×
+          [(17 × Firepower + 3 × AIM + 2 × Support + 3 × Supremacy) / 25]</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Calculation details</h2>
+    <div class="card">
+      <p>All inputs are averages per battle, except the accuracy values, which are calculated from total shots, hits and penetrations across the session.</p>
+      <div class="formula">Firepower = [(100 + ADR) × (1 + KPR)^(1/7) − 777] / 20
+AIM       = [(1 + AccH) × (1 + AccP) − 0.9] / 0.029
+Support   = [(1 + DE)² × (200 + Assist)² × (400 + Blocked)]^(1/3) / 19
+Supremacy = √(40 + iPoints + sPoints) / 0.13</div>
+      <ul>
+        <li><b>AccH</b> and <b>AccP</b> are proportions in the formula (for example, 75% is 0.75), even though the table displays them as percentages.</li>
+        <li><b>iPoints</b> is net objective points earned: earned points minus points seized. <b>sPoints</b> is points seized.</li>
+        <li>The formula is applied to the session totals after they are converted to per-battle averages. More replays make the result more representative.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Use BPR fairly</h2>
+    <p class="note">BPR is best used to compare players in the same analyzed session, not as an absolute measure across every tank, tier, map or game mode. It describes measurable replay contribution, not every good decision a player makes.</p>
+  </section>
+  <a class="back" href="/">← Back to analyzer</a>
+</main>
+</body>
+</html>
