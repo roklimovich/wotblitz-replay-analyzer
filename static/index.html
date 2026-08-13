@@ -44,6 +44,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .nav-tab.active{color:var(--tx)}
 .nav-tab.dim{opacity:.35;pointer-events:none}
 .nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.lang-select{height:30px;border:1px solid var(--br);border-radius:var(--rs);background:var(--bg);color:var(--tx2);font:600 12px 'Inter',sans-serif;padding:0 8px;outline:none}
+.lang-select:focus{border-color:var(--or);color:var(--tx)}
 .nav-action{display:none}
 body.analyze-mode.has-session .nav-action{display:inline-flex}
 body.shared-mode #btnSharePanel{display:none}
@@ -217,6 +219,7 @@ body.shared-mode .upload-grid{display:block}
 .db-status{font-size:12px;color:var(--tx3);line-height:1.4}
 .db-status strong{color:var(--tx)}
 .import-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:0}
+body.analyze-mode .import-row{grid-column:1 / -1;display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:8px;align-items:center;margin-top:2px}
 .import-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .drop-zone{border:1px dashed var(--br2);border-radius:var(--r);background:#151515;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;transition:border-color .15s,background .15s;min-height:92px;cursor:pointer}
 .drop-zone.drag{border-color:var(--or);background:var(--or-dim)}
@@ -502,6 +505,8 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   body.analyze-mode .new-analyze-card{margin:0;padding:12px;align-items:flex-start;flex-direction:column}
   body.analyze-mode .upload-card-title{margin-bottom:12px}
   body.analyze-mode .upload-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  body.analyze-mode .import-row{grid-template-columns:1fr}
+  body.analyze-mode .import-row .btn{width:100%;justify-content:center}
   body.analyze-mode .mode-switch{grid-template-columns:1fr 1fr;margin-bottom:0}
   body.analyze-mode .mode-btn{min-height:42px}
   body.analyze-mode .drop-zone{min-height:132px;padding:14px;gap:14px}
@@ -573,15 +578,15 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 </head>
 <body>
 
-<div class="veil" id="veil"><div class="spinner"></div><div class="spin-lbl" id="veilMsg">Processing replays...</div></div>
+<div class="veil" id="veil"><div class="spinner"></div><div class="spin-lbl" id="veilMsg" data-i18n="state.processing">Processing replays...</div></div>
 <div class="upload-prog" id="upProg"><div class="upload-prog-fill" id="upFill"></div></div>
 <div class="toasts" id="toasts"></div>
 <div class="player-modal" id="playerModal" onclick="closePlayerModal(event)">
   <div class="player-panel" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle" onclick="event.stopPropagation()">
     <div class="player-panel-h">
       <div>
-        <div class="player-panel-title" id="playerModalTitle">Player details</div>
-        <div class="player-panel-sub" id="playerModalSub">Session metrics</div>
+        <div class="player-panel-title" id="playerModalTitle" data-i18n="player.details">Player details</div>
+        <div class="player-panel-sub" id="playerModalSub" data-i18n="player.metrics">Session metrics</div>
       </div>
       <button class="modal-close" type="button" onclick="closePlayerModal()" aria-label="Close player details">&times;</button>
     </div>
@@ -604,14 +609,19 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   <div class="nav-tabs">
     <a class="nav-tab" id="navHome" href="/">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Home
+      <span data-i18n="nav.home">Home</span>
     </a>
     <a class="nav-tab" id="navAnalyze" href="/analyze">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Analyze
+      <span data-i18n="nav.analyze">Analyze</span>
     </a>
   </div>
   <div class="nav-right">
+    <select class="lang-select" id="langSelect" title="Language">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="ru">RU</option>
+    </select>
     <select class="share-expiry" id="shareTtlSelect" title="Share link expiration">
       <option value="86400">24h</option>
       <option value="259200">3d</option>
@@ -619,11 +629,11 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     </select>
     <button class="btn btn-ghost nav-action" id="btnSharePanel" disabled onclick="createShareLink()" title="Share 24h link" style="font-size:12px;padding:7px 12px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg>
-      Share
+      <span data-i18n="actions.share">Share</span>
     </button>
     <button class="btn btn-or nav-action" id="btnExportPanel" disabled onclick="exportXlsx()" title="Export Excel" style="font-size:12px;padding:7px 12px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3h7v7"/><path d="M21 3l-9 9"/><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/></svg>
-      Export
+      <span data-i18n="actions.export">Export</span>
     </button>
   </div>
 </nav>
@@ -633,55 +643,55 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     <div class="home-grid">
       <div class="home-copy">
         <div>
-          <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
+          <div class="eyebrow" data-i18n="hero.eyebrow">BPR 2.0 · Replay Analysis</div>
           <div class="page-title">BlitzScrim</div>
-          <div class="page-sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
+          <div class="page-sub" data-i18n="hero.sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
           <div class="home-actions">
             <a class="btn btn-or" href="/analyze">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
-              Open analyzer
+              <span data-i18n="hero.open">Open analyzer</span>
             </a>
-            <span class="home-note">Scrim reports · Individual sessions · Export ready</span>
+            <span class="home-note" data-i18n="hero.note">Scrim reports · Individual sessions · Export ready</span>
           </div>
         </div>
         <div class="home-stats">
-          <div class="hero-stat"><div class="hero-stat-val" id="globalReplays">-</div><div class="hero-stat-lbl">Replays analyzed</div></div>
-          <div class="hero-stat"><div class="hero-stat-val" id="globalPlayers">-</div><div class="hero-stat-lbl">Players analyzed</div></div>
-          <div class="hero-stat"><div class="hero-stat-val" id="globalSessions">-</div><div class="hero-stat-lbl">Sessions</div></div>
+          <div class="hero-stat"><div class="hero-stat-val" id="globalReplays">-</div><div class="hero-stat-lbl" data-i18n="stats.replaysAnalyzed">Replays analyzed</div></div>
+          <div class="hero-stat"><div class="hero-stat-val" id="globalPlayers">-</div><div class="hero-stat-lbl" data-i18n="stats.playersAnalyzed">Players analyzed</div></div>
+          <div class="hero-stat"><div class="hero-stat-val" id="globalSessions">-</div><div class="hero-stat-lbl" data-i18n="stats.sessions">Sessions</div></div>
         </div>
       </div>
 
       <div class="report-preview" aria-label="Session report preview">
         <div class="preview-head">
-          <div class="preview-title">Session report</div>
-          <div class="preview-live">Ready</div>
+          <div class="preview-title" data-i18n="preview.title">Session report</div>
+          <div class="preview-live" data-i18n="state.ready">Ready</div>
         </div>
         <div class="preview-score">
           <div class="preview-team">
-            <div class="preview-k">Our BPR</div>
+            <div class="preview-k" data-i18n="preview.ourBpr">Our BPR</div>
             <div class="preview-v ac">1.12</div>
           </div>
           <div class="preview-vs">VS</div>
           <div class="preview-team enemy">
-            <div class="preview-k">Enemy BPR</div>
+            <div class="preview-k" data-i18n="preview.enemyBpr">Enemy BPR</div>
             <div class="preview-v">0.96</div>
           </div>
         </div>
         <div class="preview-bars">
           <div class="bar-row"><div class="bar-label">ADR</div><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><div class="bar-val">+184</div></div>
-          <div class="bar-row"><div class="bar-label">Support</div><div class="bar-track"><div class="bar-fill blue" style="width:58%"></div></div><div class="bar-val">Review</div></div>
-          <div class="bar-row"><div class="bar-label">Accuracy</div><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><div class="bar-val">66%</div></div>
+          <div class="bar-row"><div class="bar-label" data-i18n="metric.support">Support</div><div class="bar-track"><div class="bar-fill blue" style="width:58%"></div></div><div class="bar-val" data-i18n="side.review">Review</div></div>
+          <div class="bar-row"><div class="bar-label" data-i18n="metric.accuracy">Accuracy</div><div class="bar-track"><div class="bar-fill" style="width:66%"></div></div><div class="bar-val">66%</div></div>
         </div>
         <div class="preview-list">
-          <div class="preview-player"><div class="preview-rank">1</div><div><div class="preview-name">Top performer</div><div class="preview-sub">Damage pressure and survival</div></div><div class="preview-bpr">1.34</div></div>
-          <div class="preview-player"><div class="preview-rank">2</div><div><div class="preview-name">Next objective</div><div class="preview-sub">Earlier focus calls</div></div><div class="preview-bpr">+8%</div></div>
+          <div class="preview-player"><div class="preview-rank">1</div><div><div class="preview-name" data-i18n="preview.topPerformer">Top performer</div><div class="preview-sub" data-i18n="preview.damageSurvival">Damage pressure and survival</div></div><div class="preview-bpr">1.34</div></div>
+          <div class="preview-player"><div class="preview-rank">2</div><div><div class="preview-name" data-i18n="preview.nextObjective">Next objective</div><div class="preview-sub" data-i18n="preview.focusCalls">Earlier focus calls</div></div><div class="preview-bpr">+8%</div></div>
         </div>
       </div>
     </div>
     <div class="home-lower">
-      <div class="home-card"><div class="home-card-k">Scrim analysis</div><div class="home-card-v">Upload a block of replays and compare your team against the opponent side.</div></div>
-      <div class="home-card"><div class="home-card-k">Individual sessions</div><div class="home-card-v">Add replays match by match and finish with focused objectives.</div></div>
-      <div class="home-card"><div class="home-card-k">Clean reporting</div><div class="home-card-v">Charts, BPR ratings, summaries, and Excel exports stay in the analyzer workspace.</div></div>
+      <div class="home-card"><div class="home-card-k" data-i18n="home.scrimTitle">Scrim analysis</div><div class="home-card-v" data-i18n="home.scrimText">Upload a block of replays and compare your team against the opponent side.</div></div>
+      <div class="home-card"><div class="home-card-k" data-i18n="home.individualTitle">Individual sessions</div><div class="home-card-v" data-i18n="home.individualText">Add replays match by match and finish with focused objectives.</div></div>
+      <div class="home-card"><div class="home-card-k" data-i18n="home.reportingTitle">Clean reporting</div><div class="home-card-v" data-i18n="home.reportingText">Charts, BPR ratings, summaries, and Excel exports stay in the analyzer workspace.</div></div>
     </div>
   </section>
   <section class="home-demo" aria-label="Sample analysis">
@@ -689,17 +699,17 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       <div>
         <div class="home-demo-head">
           <div>
-            <div class="eyebrow">Sample session</div>
-            <div class="home-demo-title">Full scrim report preview</div>
-            <div class="home-demo-sub">Fictional players, same layout as a real analysis.</div>
+            <div class="eyebrow" data-i18n="demo.eyebrow">Sample session</div>
+            <div class="home-demo-title" data-i18n="demo.title">Full scrim report preview</div>
+            <div class="home-demo-sub" data-i18n="demo.sub">Fictional players, same layout as a real analysis.</div>
           </div>
-          <a class="btn btn-ghost" href="/analyze">Try with replays</a>
+          <a class="btn btn-ghost" href="/analyze" data-i18n="demo.try">Try with replays</a>
         </div>
         <div class="demo-board">
           <div class="demo-board-h">
-            <div><div class="demo-team-k">Our avg BPR</div><div class="demo-team-v ac">1.08</div></div>
+            <div><div class="demo-team-k" data-i18n="stats.ourAvgBpr">Our avg BPR</div><div class="demo-team-v ac">1.08</div></div>
             <div class="demo-vs">VS</div>
-            <div style="text-align:right"><div class="demo-team-k">Enemy avg BPR</div><div class="demo-team-v">0.94</div></div>
+            <div style="text-align:right"><div class="demo-team-k" data-i18n="stats.enemyAvgBpr">Enemy avg BPR</div><div class="demo-team-v">0.94</div></div>
           </div>
           <div class="demo-lists">
             <div class="demo-list">
@@ -718,12 +728,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         </div>
       </div>
       <div class="demo-summary">
-        <div class="demo-summary-title">What the report surfaces</div>
-        <div class="demo-summary-line"><div class="demo-summary-k">ADR edge</div><div class="demo-track"><div class="demo-fill" style="width:67%"></div></div><div class="demo-summary-v">+216</div></div>
-        <div class="demo-summary-line"><div class="demo-summary-k">Focus fire</div><div class="demo-track"><div class="demo-fill blue" style="width:52%"></div></div><div class="demo-summary-v">Review</div></div>
-        <div class="demo-summary-line"><div class="demo-summary-k">Survival</div><div class="demo-track"><div class="demo-fill" style="width:74%"></div></div><div class="demo-summary-v">Strong</div></div>
-        <div class="demo-note">AI summary: damage pressure is ahead, but two early trades were split across targets. Next block: call the first focus target before crossing and keep the same heavy-side structure.</div>
-        <div class="demo-note">Excel export keeps both teams in separate sheets. Excel import can turn a saved team sheet into a local team database for later comparison.</div>
+        <div class="demo-summary-title" data-i18n="demo.surfaces">What the report surfaces</div>
+        <div class="demo-summary-line"><div class="demo-summary-k" data-i18n="metric.adrEdge">ADR edge</div><div class="demo-track"><div class="demo-fill" style="width:67%"></div></div><div class="demo-summary-v">+216</div></div>
+        <div class="demo-summary-line"><div class="demo-summary-k" data-i18n="metric.focusFire">Focus fire</div><div class="demo-track"><div class="demo-fill blue" style="width:52%"></div></div><div class="demo-summary-v" data-i18n="side.review">Review</div></div>
+        <div class="demo-summary-line"><div class="demo-summary-k" data-i18n="metric.survival">Survival</div><div class="demo-track"><div class="demo-fill" style="width:74%"></div></div><div class="demo-summary-v" data-i18n="metric.strong">Strong</div></div>
+        <div class="demo-note" data-i18n="demo.aiNote">AI summary: damage pressure is ahead, but two early trades were split across targets. Next block: call the first focus target before crossing and keep the same heavy-side structure.</div>
+        <div class="demo-note" data-i18n="demo.excelNote">Excel export keeps both teams in separate sheets. Excel import can turn a saved team sheet into a local team database for later comparison.</div>
       </div>
     </div>
   </section>
@@ -734,31 +744,31 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="side-head">
-      <div class="side-title">Analyzer</div>
-      <div class="side-sub">Import, review, share.</div>
+      <div class="side-title" data-i18n="side.title">Analyzer</div>
+      <div class="side-sub" data-i18n="side.sub">Import, review, share.</div>
     </div>
-    <div class="sb-lbl">Workflow</div>
+    <div class="sb-lbl" data-i18n="side.workflow">Workflow</div>
     <button class="sb-item active" data-section="overview" onclick="switchSection('overview')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
-      Review
+      <span data-i18n="side.review">Review</span>
     </button>
     <button class="sb-item" id="sbAnalytics" data-section="analytics" onclick="switchSection('analytics')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
-      Charts
+      <span data-i18n="side.charts">Charts</span>
     </button>
-    <div class="sb-lbl">Tables</div>
+    <div class="sb-lbl" data-i18n="side.tables">Tables</div>
     <button class="sb-item dim" id="sbOurTeam" data-section="our" onclick="switchSection('our')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
-      Our Team
+      <span data-i18n="side.our">Our Team</span>
     </button>
     <button class="sb-item dim" id="sbEnemyTeam" data-section="enemy" onclick="switchSection('enemy')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-      Enemy Team
+      <span data-i18n="side.enemy">Enemy Team</span>
     </button>
-    <div class="sb-lbl">System</div>
+    <div class="sb-lbl" data-i18n="side.system">System</div>
     <button class="sb-item" id="sbSettings" data-section="settings" onclick="switchSection('settings')">
       <span class="sb-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></span>
-      Settings
+      <span data-i18n="side.settings">Settings</span>
     </button>
   </aside>
 
@@ -770,30 +780,30 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       <div class="hero-grid">
         <div class="hero-copy">
           <div>
-            <div class="eyebrow">BPR 2.0 · Replay Analysis</div>
+            <div class="eyebrow" data-i18n="hero.eyebrow">BPR 2.0 · Replay Analysis</div>
             <div class="page-title">BlitzScrim</div>
-            <div class="page-sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
+            <div class="page-sub" data-i18n="hero.sub">Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.</div>
           </div>
           <div class="hero-stats">
-            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Replays analyzed</div></div>
-            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Players analyzed</div></div>
-            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl">Sessions</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl" data-i18n="stats.replaysAnalyzed">Replays analyzed</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl" data-i18n="stats.playersAnalyzed">Players analyzed</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">-</div><div class="hero-stat-lbl" data-i18n="stats.sessions">Sessions</div></div>
           </div>
         </div>
 
         <div class="report-preview" aria-label="Session report preview">
           <div class="preview-head">
-            <div class="preview-title">Session report</div>
-            <div class="preview-live">Ready</div>
+            <div class="preview-title" data-i18n="preview.title">Session report</div>
+            <div class="preview-live" data-i18n="state.ready">Ready</div>
           </div>
           <div class="preview-score">
             <div class="preview-team">
-              <div class="preview-k">Our BPR</div>
+              <div class="preview-k" data-i18n="preview.ourBpr">Our BPR</div>
               <div class="preview-v ac">1.12</div>
             </div>
             <div class="preview-vs">VS</div>
             <div class="preview-team enemy">
-              <div class="preview-k">Enemy BPR</div>
+              <div class="preview-k" data-i18n="preview.enemyBpr">Enemy BPR</div>
               <div class="preview-v">0.96</div>
             </div>
           </div>
@@ -804,12 +814,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
               <div class="bar-val">+184</div>
             </div>
             <div class="bar-row">
-              <div class="bar-label">Support</div>
+              <div class="bar-label" data-i18n="metric.support">Support</div>
               <div class="bar-track"><div class="bar-fill blue" style="width:58%"></div></div>
-              <div class="bar-val">Review</div>
+              <div class="bar-val" data-i18n="side.review">Review</div>
             </div>
             <div class="bar-row">
-              <div class="bar-label">Accuracy</div>
+              <div class="bar-label" data-i18n="metric.accuracy">Accuracy</div>
               <div class="bar-track"><div class="bar-fill" style="width:66%"></div></div>
               <div class="bar-val">66%</div>
             </div>
@@ -817,38 +827,29 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
           <div class="preview-list">
             <div class="preview-player">
               <div class="preview-rank">1</div>
-              <div><div class="preview-name">Top performer</div><div class="preview-sub">Damage pressure and survival</div></div>
+              <div><div class="preview-name" data-i18n="preview.topPerformer">Top performer</div><div class="preview-sub" data-i18n="preview.damageSurvival">Damage pressure and survival</div></div>
               <div class="preview-bpr">1.34</div>
             </div>
             <div class="preview-player">
               <div class="preview-rank">2</div>
-              <div><div class="preview-name">Next objective</div><div class="preview-sub">Earlier focus calls</div></div>
+              <div><div class="preview-name" data-i18n="preview.nextObjective">Next objective</div><div class="preview-sub" data-i18n="preview.focusCalls">Earlier focus calls</div></div>
               <div class="preview-bpr">+8%</div>
             </div>
           </div>
         </div>
 
         <div class="upload-card">
-          <div class="upload-card-title">Replay input</div>
+          <div class="upload-card-title" data-i18n="upload.cardTitle">Replay input</div>
           <div class="upload-grid">
             <div>
               <div class="mode-switch" aria-label="Analysis mode">
-                <button class="mode-btn active" id="modeScrim" onclick="setAnalysisMode('scrim')">Scrim</button>
-                <button class="mode-btn" id="modeIndividual" onclick="setAnalysisMode('individual')">Individual</button>
+                <button class="mode-btn active" id="modeScrim" onclick="setAnalysisMode('scrim')" data-i18n="mode.scrim">Scrim</button>
+                <button class="mode-btn" id="modeIndividual" onclick="setAnalysisMode('individual')" data-i18n="mode.individual">Individual</button>
               </div>
               <div class="session-bar hidden" id="sessionControls">
-                <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()">Start Session</button>
-                <button class="btn btn-ghost" id="finishSessionBtn" onclick="finishLiveSession()" disabled>Finish</button>
-                <div class="session-meta" id="sessionMeta">No active session</div>
-              </div>
-              <div class="import-row">
-                <input class="f-input f-input-wide local-only" id="folderInput" type="text"
-                  placeholder="D:\World of Tanks Blitz\replays\2026-03-18"
-                  onkeydown="if(event.key==='Enter')generatePath()"/>
-                <button class="btn btn-or local-only" onclick="generatePath()">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  Generate
-                </button>
+                <button class="btn btn-ghost" id="startSessionBtn" onclick="startLiveSession()" data-i18n="session.start">Start Session</button>
+                <button class="btn btn-ghost" id="finishSessionBtn" onclick="finishLiveSession()" disabled data-i18n="session.finish">Finish</button>
+                <div class="session-meta" id="sessionMeta" data-i18n="session.none">No active session</div>
               </div>
             </div>
 
@@ -858,57 +859,66 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </div>
                 <div>
-                  <div class="drop-title">Drop replay files here</div>
+                  <div class="drop-title" data-i18n="upload.title">Drop replay files here</div>
                   <div class="drop-sub" id="uploadLimits">Only .wotbreplay files are accepted.</div>
                 </div>
               </div>
               <div class="drop-actions">
                 <button class="btn btn-or" onclick="event.stopPropagation();document.getElementById('fileInput').click()">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  Select Files
+                  <span data-i18n="upload.select">Select Files</span>
                 </button>
-                <button class="link-btn desktop-only" onclick="event.stopPropagation();document.getElementById('folderFileInput').click()">Folder</button>
-                <button class="link-btn" id="clearBtn" onclick="event.stopPropagation();clearAll()" style="display:none">Clear</button>
+                <button class="link-btn desktop-only" onclick="event.stopPropagation();document.getElementById('folderFileInput').click()" data-i18n="upload.folder">Folder</button>
+                <button class="link-btn" id="clearBtn" onclick="event.stopPropagation();clearAll()" style="display:none" data-i18n="upload.clear">Clear</button>
               </div>
+            </div>
+            <div class="import-row local-only">
+              <input class="f-input f-input-wide" id="folderInput" type="text"
+                placeholder="D:\World of Tanks Blitz\replays\2026-03-18"
+                onkeydown="if(event.key==='Enter')generatePath()"/>
+              <button class="btn btn-or" onclick="generatePath()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span data-i18n="upload.generate">Generate</span>
+              </button>
             </div>
           </div>
           <div class="hidden-status">
-            <div id="shareStatus">No shared link created</div>
-            <div id="teamDbStatus">No team database loaded</div>
+            <div id="shareStatus" data-i18n="share.none">No shared link created</div>
+            <div id="teamDbStatus" data-i18n="teamDb.none">No team database loaded</div>
           </div>
         </div>
         <div class="new-analyze-card">
           <div class="new-analyze-copy">
-            <div class="new-analyze-title">Analysis loaded</div>
-            <div class="new-analyze-sub">Start a new analysis to upload another replay set.</div>
+            <div class="new-analyze-title" data-i18n="new.title">Analysis loaded</div>
+            <div class="new-analyze-sub" data-i18n="new.sub">Start a new analysis to upload another replay set.</div>
           </div>
-          <button class="btn btn-or" onclick="clearAll()">New Analyze</button>
+          <button class="btn btn-or" onclick="clearAll()" data-i18n="new.button">New Analyze</button>
         </div>
       </div>
 
       <div class="health-panel" id="healthPanel">
         <div class="health-grid">
-          <div class="health-item"><div class="health-lbl">Parser</div><div class="health-val" id="hParser">-</div></div>
-          <div class="health-item"><div class="health-lbl">Tank DB</div><div class="health-val" id="hTankDb">-</div></div>
-          <div class="health-item"><div class="health-lbl">Upload Limit</div><div class="health-val" id="hUpload">-</div></div>
-          <div class="health-item"><div class="health-lbl">Executable</div><div class="health-val" id="hPath">-</div></div>
+          <div class="health-item"><div class="health-lbl" data-i18n="health.parser">Parser</div><div class="health-val" id="hParser">-</div></div>
+          <div class="health-item"><div class="health-lbl" data-i18n="health.tankDb">Tank DB</div><div class="health-val" id="hTankDb">-</div></div>
+          <div class="health-item"><div class="health-lbl" data-i18n="health.uploadLimit">Upload Limit</div><div class="health-val" id="hUpload">-</div></div>
+          <div class="health-item"><div class="health-lbl" data-i18n="health.executable">Executable</div><div class="health-val" id="hPath">-</div></div>
         </div>
       </div>
 
       <div class="strip" id="strip">
-        <div><div class="sp-lbl">Replays</div><div class="sp-val" id="sReplays">-</div></div>
-        <div><div class="sp-lbl">Our Players</div><div class="sp-val" id="sOurPlayers">-</div></div>
-        <div><div class="sp-lbl">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">-</div></div>
-        <div><div class="sp-lbl metric-help">Our Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val ac" id="sOurBpr">-</div></div>
-        <div><div class="sp-lbl metric-help">Enemy Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val" id="sEnemyBpr">-</div></div>
-        <div><div class="sp-lbl">Our Best</div><div class="sp-val ac" id="sOurBest">-</div></div>
-        <div><div class="sp-lbl">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">-</div></div>
+        <div><div class="sp-lbl" data-i18n="stats.replays">Replays</div><div class="sp-val" id="sReplays">-</div></div>
+        <div><div class="sp-lbl" data-i18n="stats.ourPlayers">Our Players</div><div class="sp-val" id="sOurPlayers">-</div></div>
+        <div><div class="sp-lbl" data-i18n="stats.enemyPlayers">Enemy Players</div><div class="sp-val" id="sEnemyPlayers">-</div></div>
+        <div><div class="sp-lbl metric-help" data-i18n-help="stats.ourAvgBpr">Our Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val ac" id="sOurBpr">-</div></div>
+        <div><div class="sp-lbl metric-help" data-i18n-help="stats.enemyAvgBpr">Enemy Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></div><div class="sp-val" id="sEnemyBpr">-</div></div>
+        <div><div class="sp-lbl" data-i18n="stats.ourBest">Our Best</div><div class="sp-val ac" id="sOurBest">-</div></div>
+        <div><div class="sp-lbl" data-i18n="stats.parseErrors">Parse Errors</div><div class="sp-val" id="sErr" style="color:var(--rd)">-</div></div>
       </div>
     </div>
 
     <!-- ERROR PANEL -->
     <div class="err-panel" id="errPanel">
-      <div class="err-title">Warning Failed to parse</div>
+      <div class="err-title" data-i18n="errors.parseWarning">Warning Failed to parse</div>
       <div class="err-list" id="errList"></div>
     </div>
 
@@ -918,8 +928,8 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <!-- OUR TEAM -->
         <div class="team-side">
           <div class="team-header">
-            <span class="team-label-our">Our Team</span>
-            <span class="team-avg-bpr"><span class="metric-help">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovOurAvg">-</span></span>
+            <span class="team-label-our" data-i18n="side.our">Our Team</span>
+            <span class="team-avg-bpr"><span class="metric-help" data-i18n-help="stats.avgBpr">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovOurAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovOurList"></div>
         </div>
@@ -932,8 +942,8 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <!-- ENEMY TEAM -->
         <div class="team-side">
           <div class="team-header">
-            <span class="team-label-enemy">Enemy Team</span>
-            <span class="team-avg-bpr"><span class="metric-help">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovEnemyAvg">-</span></span>
+            <span class="team-label-enemy" data-i18n="side.enemy">Enemy Team</span>
+            <span class="team-avg-bpr"><span class="metric-help" data-i18n-help="stats.avgBpr">Avg BPR <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.</span></span> <span id="ovEnemyAvg">-</span></span>
           </div>
           <div class="ov-list" id="ovEnemyList"></div>
         </div>
@@ -943,21 +953,21 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     <!-- ANALYTICS SECTION -->
     <div class="section" id="secAnalytics">
       <div id="analyticsEmpty" class="empty-analytics">
-        <div class="empty-t">No session loaded</div>
-        <div class="empty-s">Load replays to generate charts and session insights</div>
+        <div class="empty-t" data-i18n="empty.noSession">No session loaded</div>
+        <div class="empty-s" data-i18n="empty.loadReplays">Load replays to generate charts and session insights</div>
       </div>
       <div id="analyticsContent" style="display:none">
         <div class="metric-grid">
-          <div class="metric-box"><div class="metric-lbl">BPR Edge</div><div class="metric-val" id="mBprEdge">-</div><div class="metric-sub" id="mBprEdgeSub">-</div></div>
-          <div class="metric-box"><div class="metric-lbl">ADR Edge</div><div class="metric-val" id="mAdrEdge">-</div><div class="metric-sub" id="mAdrEdgeSub">-</div></div>
-          <div class="metric-box"><div class="metric-lbl">Best Player</div><div class="metric-val" id="mBestPlayer">-</div><div class="metric-sub" id="mBestPlayerSub">-</div></div>
-          <div class="metric-box"><div class="metric-lbl">Replay Health</div><div class="metric-val" id="mReplayHealth">-</div><div class="metric-sub" id="mReplayHealthSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl" data-i18n="metric.bprEdge">BPR Edge</div><div class="metric-val" id="mBprEdge">-</div><div class="metric-sub" id="mBprEdgeSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl" data-i18n="metric.adrEdge">ADR Edge</div><div class="metric-val" id="mAdrEdge">-</div><div class="metric-sub" id="mAdrEdgeSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl" data-i18n="metric.bestPlayer">Best Player</div><div class="metric-val" id="mBestPlayer">-</div><div class="metric-sub" id="mBestPlayerSub">-</div></div>
+          <div class="metric-box"><div class="metric-lbl" data-i18n="metric.replayHealth">Replay Health</div><div class="metric-val" id="mReplayHealth">-</div><div class="metric-sub" id="mReplayHealthSub">-</div></div>
         </div>
         <div class="analytics-grid">
-          <div class="chart-box"><div class="panel-title">Team Averages</div><canvas id="chartAverages" width="520" height="220"></canvas></div>
-          <div class="chart-box"><div class="panel-title">Tank Type Mix</div><canvas id="chartTypes" width="520" height="220"></canvas></div>
-          <div class="chart-box"><div class="panel-title">Top BPR Players</div><canvas id="chartTopBpr" width="520" height="220"></canvas></div>
-          <div class="summary-box"><div class="panel-title">Session Summary</div><div class="summary-text" id="aiSummary">-</div></div>
+          <div class="chart-box"><div class="panel-title" data-i18n="chart.averages">Team Averages</div><canvas id="chartAverages" width="520" height="220"></canvas></div>
+          <div class="chart-box"><div class="panel-title" data-i18n="chart.types">Tank Type Mix</div><canvas id="chartTypes" width="520" height="220"></canvas></div>
+          <div class="chart-box"><div class="panel-title" data-i18n="chart.topBpr">Top BPR Players</div><canvas id="chartTopBpr" width="520" height="220"></canvas></div>
+          <div class="summary-box"><div class="panel-title" data-i18n="chart.summary">Session Summary</div><div class="summary-text" id="aiSummary">-</div></div>
         </div>
       </div>
     </div>
@@ -965,19 +975,19 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
     <!-- SETTINGS SECTION -->
     <div class="section" id="secSettings">
       <div class="settings-box">
-        <div class="panel-title">System Settings</div>
+        <div class="panel-title" data-i18n="settings.title">System Settings</div>
         <div class="settings-grid">
-          <div class="settings-row"><div class="settings-k">Parser</div><div class="settings-v" id="setParser">-</div></div>
-          <div class="settings-row"><div class="settings-k">Tank DB</div><div class="settings-v" id="setTankDb">-</div></div>
-          <div class="settings-row"><div class="settings-k">Upload Limit</div><div class="settings-v" id="setUpload">-</div></div>
-          <div class="settings-row"><div class="settings-k">File Limit</div><div class="settings-v" id="setFileLimit">-</div></div>
-          <div class="settings-row"><div class="settings-k">Temporary Storage</div><div class="settings-v" id="setStorage">-</div></div>
-          <div class="settings-row"><div class="settings-k">Executable</div><div class="settings-v" id="setPath">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="health.parser">Parser</div><div class="settings-v" id="setParser">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="health.tankDb">Tank DB</div><div class="settings-v" id="setTankDb">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="health.uploadLimit">Upload Limit</div><div class="settings-v" id="setUpload">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="settings.fileLimit">File Limit</div><div class="settings-v" id="setFileLimit">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="settings.tempStorage">Temporary Storage</div><div class="settings-v" id="setStorage">-</div></div>
+          <div class="settings-row"><div class="settings-k" data-i18n="health.executable">Executable</div><div class="settings-v" id="setPath">-</div></div>
         </div>
         <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-ghost" onclick="refreshHealth(true)">Refresh System</button>
-          <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()">Import team Excel</button>
-          <button class="btn btn-ghost" onclick="copySessionSummary()">Copy Summary</button>
+          <button class="btn btn-ghost" onclick="refreshHealth(true)" data-i18n="settings.refresh">Refresh System</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('excelInput').click()" data-i18n="settings.importExcel">Import team Excel</button>
+          <button class="btn btn-ghost" onclick="copySessionSummary()" data-i18n="settings.copySummary">Copy Summary</button>
         </div>
       </div>
     </div>
@@ -987,12 +997,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       <div class="toolbar-l">
         <div class="search-wrap">
           <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-inp" id="searchOur" placeholder="Search player..." oninput="renderTable('our')"/>
+          <input class="search-inp" id="searchOur" data-i18n-placeholder="table.searchPlayer" placeholder="Search player..." oninput="renderTable('our')"/>
         </div>
         <div class="dd-wrap" id="ddOurWrap">
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('our')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
-            Columns
+            <span data-i18n="table.columns">Columns</span>
           </button>
           <div class="dd-menu" id="ddOurMenu"></div>
         </div>
@@ -1004,7 +1014,7 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <table><thead id="thOur"></thead><tbody id="tbOur"></tbody></table>
         <div class="empty-state" id="emptyOur" style="display:none">
           <div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--tx3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <div class="empty-t">No players found</div><div class="empty-s">Try a different search</div>
+          <div class="empty-t" data-i18n="empty.noPlayers">No players found</div><div class="empty-s" data-i18n="empty.trySearch">Try a different search</div>
         </div>
       </div>
     </div>
@@ -1014,12 +1024,12 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
       <div class="toolbar-l">
         <div class="search-wrap">
           <svg class="s-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input class="search-inp" id="searchEnemy" placeholder="Search player..." oninput="renderTable('enemy')"/>
+          <input class="search-inp" id="searchEnemy" data-i18n-placeholder="table.searchPlayer" placeholder="Search player..." oninput="renderTable('enemy')"/>
         </div>
         <div class="dd-wrap" id="ddEnemyWrap">
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="toggleDD('enemy')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
-            Columns
+            <span data-i18n="table.columns">Columns</span>
           </button>
           <div class="dd-menu" id="ddEnemyMenu"></div>
         </div>
@@ -1031,20 +1041,21 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
         <table><thead id="thEnemy"></thead><tbody id="tbEnemy"></tbody></table>
         <div class="empty-state" id="emptyEnemy" style="display:none">
           <div class="empty-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" color="var(--tx3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <div class="empty-t">No players found</div><div class="empty-s">Try a different search</div>
+          <div class="empty-t" data-i18n="empty.noPlayers">No players found</div><div class="empty-s" data-i18n="empty.trySearch">Try a different search</div>
         </div>
       </div>
     </div>
 
     <footer class="site-footer">
       <div class="footer-credit">
-        PerFORmance &middot; Based on the original WoT Blitz Replay Analyzer project by
+        <span data-i18n="footer.credit">PerFORmance · Based on the original WoT Blitz Replay Analyzer project by</span>
         <a href="https://github.com/roklimovich/wotblitz-replay-analyzer" target="_blank" rel="noopener noreferrer">roklimovich</a>.
-        <a href="/bpr">How BPR works</a> · <a href="/privacy">Privacy</a>
+        <a href="/bpr">How BPR works</a> ·
+        <a href="/privacy" data-i18n="footer.privacy">Privacy</a>
       </div>
       <div class="footer-status">
         <button class="sys-pill" id="sysPill" onclick="refreshHealth(true)" title="System status">
-          <span class="sys-dot"></span><span id="sysTxt">Checking</span>
+          <span class="sys-dot"></span><span id="sysTxt" data-i18n="state.checking">Checking</span>
         </button>
       </div>
     </footer>
@@ -1054,7 +1065,654 @@ td{padding:12px 14px;font-size:13px;color:var(--tx2);vertical-align:middle}
 
 <script>
 const API = '';
-const BPR_HELP_TEXT = 'BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.';
+const I18N = {
+  en: {
+    'nav.home':'Home',
+    'nav.analyze':'Analyze',
+    'actions.share':'Share',
+    'actions.export':'Export',
+    'mode.scrim':'Scrim',
+    'mode.individual':'Individual',
+    'upload.title':'Drop replay files here',
+    'upload.select':'Select Files',
+    'upload.folder':'Folder',
+    'upload.clear':'Clear',
+    'upload.generate':'Generate',
+    'new.title':'Analysis loaded',
+    'new.sub':'Start a new analysis to upload another replay set.',
+    'new.button':'New Analyze',
+    'side.title':'Analyzer',
+    'side.sub':'Import, review, share.',
+    'side.workflow':'Workflow',
+    'side.review':'Review',
+    'side.charts':'Charts',
+    'side.tables':'Tables',
+    'side.our':'Our Team',
+    'side.enemy':'Enemy Team',
+    'side.system':'System',
+    'side.settings':'Settings',
+    'bpr.help':'BPR 2.0 is a replay performance score combining damage impact, accuracy, support actions and game mode contribution. It is designed for comparison inside the analyzed session.',
+    'hero.eyebrow':'BPR 2.0 · Replay Analysis',
+    'hero.sub':'Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.',
+    'hero.open':'Open analyzer',
+    'hero.note':'Scrim reports · Individual sessions · Export ready',
+    'stats.replaysAnalyzed':'Replays analyzed',
+    'stats.playersAnalyzed':'Players analyzed',
+    'stats.sessions':'Sessions',
+    'stats.replays':'Replays',
+    'stats.ourPlayers':'Our Players',
+    'stats.enemyPlayers':'Enemy Players',
+    'stats.ourAvgBpr':'Our Avg BPR',
+    'stats.enemyAvgBpr':'Enemy Avg BPR',
+    'stats.avgBpr':'Avg BPR',
+    'stats.ourBest':'Our Best',
+    'stats.parseErrors':'Parse Errors',
+    'preview.title':'Session report',
+    'preview.ourBpr':'Our BPR',
+    'preview.enemyBpr':'Enemy BPR',
+    'preview.topPerformer':'Top performer',
+    'preview.damageSurvival':'Damage pressure and survival',
+    'preview.nextObjective':'Next objective',
+    'preview.focusCalls':'Earlier focus calls',
+    'home.scrimTitle':'Scrim analysis',
+    'home.scrimText':'Upload a block of replays and compare your team against the opponent side.',
+    'home.individualTitle':'Individual sessions',
+    'home.individualText':'Add replays match by match and finish with focused objectives.',
+    'home.reportingTitle':'Clean reporting',
+    'home.reportingText':'Charts, BPR ratings, summaries, and Excel exports stay in the analyzer workspace.',
+    'demo.eyebrow':'Sample session',
+    'demo.title':'Full scrim report preview',
+    'demo.sub':'Fictional players, same layout as a real analysis.',
+    'demo.try':'Try with replays',
+    'demo.surfaces':'What the report surfaces',
+    'demo.aiNote':'AI summary: damage pressure is ahead, but two early trades were split across targets. Next block: call the first focus target before crossing and keep the same heavy-side structure.',
+    'demo.excelNote':'Excel export keeps both teams in separate sheets. Excel import can turn a saved team sheet into a local team database for later comparison.',
+    'upload.cardTitle':'Replay input',
+    'upload.limits':'Up to {files} files · {mb} MB total · .wotbreplay only',
+    'upload.onlyReplay':'Only .wotbreplay files are accepted.',
+    'session.start':'Start Session',
+    'session.finish':'Finish',
+    'session.new':'New Session',
+    'session.none':'No active session',
+    'session.recording':'Recording',
+    'session.saved':'Saved',
+    'session.replays':'replays',
+    'session.uploads':'uploads',
+    'share.none':'No shared link created',
+    'share.copied':'Copied - expires {expires}',
+    'share.renewed':'Shared report - renewed until {expires}',
+    'teamDb.none':'No team database loaded',
+    'teamDb.loaded':'{count} players loaded',
+    'teamDb.loadedFrom':'{count} players loaded from {file}',
+    'state.processing':'Processing replays...',
+    'state.ready':'Ready',
+    'state.checking':'Checking',
+    'state.offline':'Offline',
+    'state.needsSetup':'Needs setup',
+    'state.missing':'Missing',
+    'state.unavailable':'Unavailable',
+    'state.unknown':'Unknown',
+    'state.notFound':'Not found',
+    'state.backendUnreachable':'Backend unreachable',
+    'health.parser':'Parser',
+    'health.tankDb':'Tank DB',
+    'health.uploadLimit':'Upload Limit',
+    'health.executable':'Executable',
+    'health.tanks':'{count} tanks',
+    'health.tanksLoaded':'{count} tanks loaded',
+    'settings.title':'System Settings',
+    'settings.fileLimit':'File Limit',
+    'settings.tempStorage':'Temporary Storage',
+    'settings.refresh':'Refresh System',
+    'settings.importExcel':'Import team Excel',
+    'settings.copySummary':'Copy Summary',
+    'settings.replayFiles':'{count} replay files',
+    'settings.tempSessions':'{count} temp sessions · {minutes} min TTL',
+    'metric.support':'Support',
+    'metric.accuracy':'Accuracy',
+    'metric.adrEdge':'ADR Edge',
+    'metric.bprEdge':'BPR Edge',
+    'metric.focusFire':'Focus fire',
+    'metric.survival':'Survival',
+    'metric.strong':'Strong',
+    'metric.bestPlayer':'Best Player',
+    'metric.replayHealth':'Replay Health',
+    'metric.ourTeamLeads':'Our team leads',
+    'metric.enemyTeamLeads':'Enemy team leads',
+    'metric.damageAdvantage':'Damage pressure advantage',
+    'metric.damageDeficit':'Damage pressure deficit',
+    'metric.parsedErrors':'{processed}/{discovered} parsed - {errors} errors',
+    'chart.averages':'Team Averages',
+    'chart.types':'Tank Type Mix',
+    'chart.topBpr':'Top BPR Players',
+    'chart.summary':'Session Summary',
+    'empty.noSession':'No session loaded',
+    'empty.loadReplays':'Load replays to generate charts and session insights',
+    'empty.noPlayers':'No players found',
+    'empty.trySearch':'Try a different search',
+    'table.searchPlayer':'Search player...',
+    'table.columns':'Columns',
+    'table.players':'{count} players',
+    'table.player':'{count} player',
+    'player.details':'Player details',
+    'player.metrics':'Session metrics',
+    'player.unknownTank':'Unknown tank',
+    'player.battle':'battle',
+    'player.battles':'battles',
+    'player.killsBattle':'Kills / battle',
+    'player.penRate':'Pen rate',
+    'errors.parseWarning':'Warning Failed to parse',
+    'footer.credit':'PerFORmance · Based on the original WoT Blitz Replay Analyzer project by',
+    'footer.privacy':'Privacy',
+    'source.selectedFiles':'selected files',
+    'source.selectedFolder':'selected folder',
+    'share.title':'Share {ttl} link',
+    'share.expired':'Shared link expired or unavailable',
+    'toast.noReplayFiles':'No .wotbreplay files found in {source}',
+    'toast.importingExcel':'Importing team Excel...',
+    'toast.excelImportFailed':'Excel import failed',
+    'toast.excelImportError':'Excel import error',
+    'toast.playersImportedExcel':'{count} players imported from Excel',
+    'toast.uploadingReplays':'Uploading {count} replays...',
+    'toast.badResponse':'Bad response',
+    'toast.networkError':'Network error',
+    'toast.addedToSession':'Added {count} replays to session',
+    'toast.playersLoadedFromReplays':'{players} players loaded from {replays} replays',
+    'toast.uploadError':'Upload error',
+    'toast.sessionStarted':'Session started. Upload each replay after the match.',
+    'toast.noActiveSession':'No active session to finish',
+    'toast.sessionFinished':'Session finished. Summary and objectives are ready.',
+    'toast.enterFolder':'Enter a folder path',
+    'toast.serverError':'Server error',
+    'toast.backendUnreachable':'Cannot reach backend. Is the server running?',
+    'toast.generatingExcel':'Generating Excel...',
+    'toast.exportFailed':'Export failed',
+    'toast.excelExported':'Excel exported - two sheets: Our Team + Enemy Team',
+    'toast.exportError':'Export error',
+    'toast.creatingShare':'Creating share link...',
+    'toast.shareFailed':'Share link failed',
+    'toast.shareCopied':'{ttl} link copied',
+    'toast.shareError':'Share error',
+    'toast.loadingShared':'Loading shared report...',
+    'toast.sharedUnavailable':'Shared report unavailable',
+    'toast.sharedLoaded':'Shared report loaded',
+    'toast.cannotLoadShared':'Cannot load shared report',
+    'toast.noSummary':'No session summary available',
+    'toast.summaryCopied':'Summary copied',
+    'toast.clipboardUnavailable':'Clipboard unavailable',
+    'summary.sessionLine':'{mode} session: {replays} replays, {uploads} uploads.',
+    'summary.nextTarget':'Next target: keep ADR above {adr} while holding accuracy near {hits}% hits and {pens}% pens.',
+    'summary.objectiveSupport':'Objective: add more crossfire and tracking value; support is the easiest growth lever for this profile.',
+    'summary.objectiveDamage':'Objective: maintain support value, then push early damage without bleeding HP first.',
+    'summary.teamEdge':'Team edge: +{value} BPR over the opponent side.',
+    'summary.teamGap':'Team gap: -{value} BPR against the opponent side.',
+    'summary.damageAhead':'Damage pressure is ahead by {value} ADR on average.',
+    'summary.damageBehind':'Damage pressure is behind by {value} ADR; review opening trades and focus fire.',
+    'summary.standout':'Standout: {name}, {bpr} BPR and {adr} ADR on {tank}.',
+    'summary.objectiveStructure':'Next objective: keep the same structure and reduce isolated deaths in the first minute.',
+    'summary.objectiveFocus':'Next objective: define focus calls earlier and avoid split damage across multiple targets.',
+    'summary.topClass':'Most used class: {label}, {value} recorded battles.',
+    'summary.parseErrors':'{count} replays failed parsing; review the error panel before treating the session as complete.',
+    'col._rank':'#',
+    'col.nickname':'Player',
+    'col.BPR':'BPR 2.0',
+    'col.battles':'Battles',
+    'col.main_tank':'Main Tank',
+    'col.HT':'HT',
+    'col.MT':'MT',
+    'col.LT':'LT',
+    'col.TD':'TD',
+    'col.ADR':'ADR',
+    'col.KPR':'KPR',
+    'col.frags':'Frags',
+    'col.DE':'DE',
+    'col.assist':'Assist',
+    'col.blocked':'Blocked',
+    'col.AccH':'AccH %',
+    'col.AccP':'AccP %',
+    'col.Firepower':'Firepower',
+    'col.AIM':'AIM',
+    'col.Support':'Support',
+    'col.Supremacy':'Supremacy',
+    'col.iPoints':'iPoints',
+    'col.sPoints':'sPoints',
+    'col.shots':'Shots',
+    'col.hits':'Hits',
+    'col.pens':'Pens',
+    'col.account_id':'Account ID'
+  },
+  fr: {
+    'nav.home':'Accueil',
+    'nav.analyze':'Analyse',
+    'actions.share':'Partager',
+    'actions.export':'Exporter',
+    'mode.scrim':'Scrim',
+    'mode.individual':'Individuel',
+    'upload.title':'Dépose les replays ici',
+    'upload.select':'Choisir fichiers',
+    'upload.folder':'Dossier',
+    'upload.clear':'Effacer',
+    'upload.generate':'Générer',
+    'new.title':'Analyse chargée',
+    'new.sub':'Lance une nouvelle analyse pour importer un autre groupe de replays.',
+    'new.button':'Nouvelle analyse',
+    'side.title':'Analyseur',
+    'side.sub':'Importer, analyser, partager.',
+    'side.workflow':'Workflow',
+    'side.review':'Vue d’ensemble',
+    'side.charts':'Graphiques',
+    'side.tables':'Tableaux',
+    'side.our':'Notre équipe',
+    'side.enemy':'Équipe adverse',
+    'side.system':'Système',
+    'side.settings':'Paramètres',
+    'bpr.help':'Le BPR 2.0 est un score de performance qui combine impact en dégâts, précision, actions de support et contribution au mode de jeu. Il sert à comparer les joueurs dans la session analysée.',
+    'hero.eyebrow':'BPR 2.0 · Analyse de replays',
+    'hero.sub':'Analyse les sessions Blitz, compare les performances d’équipe et repars avec des objectifs clairs après chaque bloc.',
+    'hero.open':'Ouvrir l’analyseur',
+    'hero.note':'Rapports scrim · Sessions individuelles · Export prêt',
+    'stats.replaysAnalyzed':'Replays analysés',
+    'stats.playersAnalyzed':'Joueurs analysés',
+    'stats.sessions':'Sessions',
+    'stats.replays':'Replays',
+    'stats.ourPlayers':'Nos joueurs',
+    'stats.enemyPlayers':'Joueurs adverses',
+    'stats.ourAvgBpr':'Notre BPR moyen',
+    'stats.enemyAvgBpr':'BPR moyen adverse',
+    'stats.avgBpr':'BPR moyen',
+    'stats.ourBest':'Notre meilleur',
+    'stats.parseErrors':'Erreurs parse',
+    'preview.title':'Rapport de session',
+    'preview.ourBpr':'Notre BPR',
+    'preview.enemyBpr':'BPR adverse',
+    'preview.topPerformer':'Meilleur joueur',
+    'preview.damageSurvival':'Pression dégâts et survie',
+    'preview.nextObjective':'Prochain objectif',
+    'preview.focusCalls':'Calls focus plus tôt',
+    'home.scrimTitle':'Analyse scrim',
+    'home.scrimText':'Importe un bloc de replays et compare ton équipe à l’équipe adverse.',
+    'home.individualTitle':'Sessions individuelles',
+    'home.individualText':'Ajoute les replays match après match et termine avec des objectifs ciblés.',
+    'home.reportingTitle':'Rapports propres',
+    'home.reportingText':'Graphiques, notes BPR, résumés et exports Excel restent dans l’espace d’analyse.',
+    'demo.eyebrow':'Session exemple',
+    'demo.title':'Aperçu complet d’un rapport scrim',
+    'demo.sub':'Joueurs fictifs, même structure qu’une vraie analyse.',
+    'demo.try':'Tester avec des replays',
+    'demo.surfaces':'Ce que le rapport fait ressortir',
+    'demo.aiNote':'Résumé IA : la pression dégâts est devant, mais deux trades précoces ont été divisés sur plusieurs cibles. Prochain bloc : annoncer la première cible focus avant la traversée et garder la même structure côté lourds.',
+    'demo.excelNote':'L’export Excel sépare les deux équipes en feuilles distinctes. L’import Excel peut transformer une feuille d’équipe en base locale pour comparaison.',
+    'upload.cardTitle':'Import de replays',
+    'upload.limits':'Jusqu’à {files} fichiers · {mb} MB au total · .wotbreplay uniquement',
+    'upload.onlyReplay':'Seuls les fichiers .wotbreplay sont acceptés.',
+    'session.start':'Démarrer session',
+    'session.finish':'Terminer',
+    'session.new':'Nouvelle session',
+    'session.none':'Aucune session active',
+    'session.recording':'Enregistrement',
+    'session.saved':'Sauvegardée',
+    'session.replays':'replays',
+    'session.uploads':'uploads',
+    'share.none':'Aucun lien partagé créé',
+    'share.copied':'Copié - expire le {expires}',
+    'share.renewed':'Rapport partagé - renouvelé jusqu’au {expires}',
+    'teamDb.none':'Aucune base équipe chargée',
+    'teamDb.loaded':'{count} joueurs chargés',
+    'teamDb.loadedFrom':'{count} joueurs chargés depuis {file}',
+    'state.processing':'Analyse des replays...',
+    'state.ready':'Prêt',
+    'state.checking':'Vérification',
+    'state.offline':'Hors ligne',
+    'state.needsSetup':'Configuration requise',
+    'state.missing':'Manquant',
+    'state.unavailable':'Indisponible',
+    'state.unknown':'Inconnu',
+    'state.notFound':'Introuvable',
+    'state.backendUnreachable':'Backend inaccessible',
+    'health.parser':'Parser',
+    'health.tankDb':'Base tanks',
+    'health.uploadLimit':'Limite upload',
+    'health.executable':'Exécutable',
+    'health.tanks':'{count} tanks',
+    'health.tanksLoaded':'{count} tanks chargés',
+    'settings.title':'Paramètres système',
+    'settings.fileLimit':'Limite fichiers',
+    'settings.tempStorage':'Stockage temporaire',
+    'settings.refresh':'Rafraîchir système',
+    'settings.importExcel':'Importer Excel équipe',
+    'settings.copySummary':'Copier résumé',
+    'settings.replayFiles':'{count} fichiers replay',
+    'settings.tempSessions':'{count} sessions temporaires · TTL {minutes} min',
+    'metric.support':'Support',
+    'metric.accuracy':'Précision',
+    'metric.adrEdge':'Avantage ADR',
+    'metric.bprEdge':'Avantage BPR',
+    'metric.focusFire':'Focus fire',
+    'metric.survival':'Survie',
+    'metric.strong':'Solide',
+    'metric.bestPlayer':'Meilleur joueur',
+    'metric.replayHealth':'Santé des replays',
+    'metric.ourTeamLeads':'Notre équipe mène',
+    'metric.enemyTeamLeads':'L’équipe adverse mène',
+    'metric.damageAdvantage':'Avantage en pression dégâts',
+    'metric.damageDeficit':'Déficit en pression dégâts',
+    'metric.parsedErrors':'{processed}/{discovered} analysés - {errors} erreurs',
+    'chart.averages':'Moyennes d’équipe',
+    'chart.types':'Répartition types de tanks',
+    'chart.topBpr':'Meilleurs joueurs BPR',
+    'chart.summary':'Résumé de session',
+    'empty.noSession':'Aucune session chargée',
+    'empty.loadReplays':'Charge des replays pour générer graphiques et insights',
+    'empty.noPlayers':'Aucun joueur trouvé',
+    'empty.trySearch':'Essaie une autre recherche',
+    'table.searchPlayer':'Rechercher un joueur...',
+    'table.columns':'Colonnes',
+    'table.players':'{count} joueurs',
+    'table.player':'{count} joueur',
+    'player.details':'Détails joueur',
+    'player.metrics':'Métriques de session',
+    'player.unknownTank':'Tank inconnu',
+    'player.battle':'bataille',
+    'player.battles':'batailles',
+    'player.killsBattle':'Kills / bataille',
+    'player.penRate':'Taux de pénétration',
+    'errors.parseWarning':'Avertissement échec de parsing',
+    'footer.credit':'PerFORmance · Basé sur le projet original WoT Blitz Replay Analyzer par',
+    'footer.privacy':'Confidentialité',
+    'source.selectedFiles':'fichiers sélectionnés',
+    'source.selectedFolder':'dossier sélectionné',
+    'share.title':'Partager un lien {ttl}',
+    'share.expired':'Lien partagé expiré ou indisponible',
+    'toast.noReplayFiles':'Aucun fichier .wotbreplay trouvé dans {source}',
+    'toast.importingExcel':'Import Excel équipe...',
+    'toast.excelImportFailed':'Échec import Excel',
+    'toast.excelImportError':'Erreur import Excel',
+    'toast.playersImportedExcel':'{count} joueurs importés depuis Excel',
+    'toast.uploadingReplays':'Upload de {count} replays...',
+    'toast.badResponse':'Réponse invalide',
+    'toast.networkError':'Erreur réseau',
+    'toast.addedToSession':'{count} replays ajoutés à la session',
+    'toast.playersLoadedFromReplays':'{players} joueurs chargés depuis {replays} replays',
+    'toast.uploadError':'Erreur upload',
+    'toast.sessionStarted':'Session démarrée. Ajoute chaque replay après le match.',
+    'toast.noActiveSession':'Aucune session active à terminer',
+    'toast.sessionFinished':'Session terminée. Résumé et objectifs prêts.',
+    'toast.enterFolder':'Entre un chemin de dossier',
+    'toast.serverError':'Erreur serveur',
+    'toast.backendUnreachable':'Backend inaccessible. Le serveur est-il lancé ?',
+    'toast.generatingExcel':'Génération Excel...',
+    'toast.exportFailed':'Échec export',
+    'toast.excelExported':'Excel exporté - deux feuilles : Notre équipe + Équipe adverse',
+    'toast.exportError':'Erreur export',
+    'toast.creatingShare':'Création du lien partagé...',
+    'toast.shareFailed':'Échec création lien',
+    'toast.shareCopied':'Lien {ttl} copié',
+    'toast.shareError':'Erreur partage',
+    'toast.loadingShared':'Chargement du rapport partagé...',
+    'toast.sharedUnavailable':'Rapport partagé indisponible',
+    'toast.sharedLoaded':'Rapport partagé chargé',
+    'toast.cannotLoadShared':'Impossible de charger le rapport partagé',
+    'toast.noSummary':'Aucun résumé de session disponible',
+    'toast.summaryCopied':'Résumé copié',
+    'toast.clipboardUnavailable':'Presse-papiers indisponible',
+    'summary.sessionLine':'Session {mode} : {replays} replays, {uploads} uploads.',
+    'summary.nextTarget':'Prochaine cible : garder l’ADR au-dessus de {adr}, avec une précision proche de {hits}% hits et {pens}% pénétrations.',
+    'summary.objectiveSupport':'Objectif : ajouter plus de crossfire et de valeur de tracking ; le support est le levier de progression le plus simple pour ce profil.',
+    'summary.objectiveDamage':'Objectif : maintenir la valeur de support, puis pousser les dégâts early sans perdre trop de HP.',
+    'summary.teamEdge':'Avantage équipe : +{value} BPR sur le camp adverse.',
+    'summary.teamGap':'Écart équipe : -{value} BPR contre le camp adverse.',
+    'summary.damageAhead':'La pression dégâts est devant de {value} ADR en moyenne.',
+    'summary.damageBehind':'La pression dégâts est derrière de {value} ADR ; revoir les trades d’ouverture et le focus fire.',
+    'summary.standout':'Joueur notable : {name}, {bpr} BPR et {adr} ADR sur {tank}.',
+    'summary.objectiveStructure':'Prochain objectif : garder la même structure et réduire les morts isolées dans la première minute.',
+    'summary.objectiveFocus':'Prochain objectif : définir les calls focus plus tôt et éviter les dégâts dispersés sur plusieurs cibles.',
+    'summary.topClass':'Classe la plus utilisée : {label}, {value} batailles enregistrées.',
+    'summary.parseErrors':'{count} replays ont échoué au parsing ; vérifie le panneau d’erreurs avant de valider la session.',
+    'col._rank':'#',
+    'col.nickname':'Joueur',
+    'col.BPR':'BPR 2.0',
+    'col.battles':'Batailles',
+    'col.main_tank':'Char principal',
+    'col.HT':'Lourd',
+    'col.MT':'Moyen',
+    'col.LT':'Léger',
+    'col.TD':'TD',
+    'col.ADR':'ADR',
+    'col.KPR':'KPR',
+    'col.frags':'Frags',
+    'col.DE':'DE',
+    'col.assist':'Assistance',
+    'col.blocked':'Bloqué',
+    'col.AccH':'Tirs %',
+    'col.AccP':'Péné %',
+    'col.Firepower':'Puissance',
+    'col.AIM':'Précision',
+    'col.Support':'Support',
+    'col.Supremacy':'Supremacy',
+    'col.iPoints':'iPoints',
+    'col.sPoints':'sPoints',
+    'col.shots':'Tirs',
+    'col.hits':'Touches',
+    'col.pens':'Péné.',
+    'col.account_id':'Account ID'
+  },
+  ru: {
+    'nav.home':'Главная',
+    'nav.analyze':'Анализ',
+    'actions.share':'Поделиться',
+    'actions.export':'Экспорт',
+    'mode.scrim':'Тренировка',
+    'mode.individual':'Индивидуальный',
+    'upload.title':'Перетащите файлы реплеев сюда',
+    'upload.select':'Выбрать файлы',
+    'upload.folder':'Папка',
+    'upload.clear':'Очистить',
+    'upload.generate':'Запуск',
+    'new.title':'Анализ загружен',
+    'new.sub':'Начните новый анализ, чтобы загрузить другой набор реплеев.',
+    'new.button':'Новый анализ',
+    'side.title':'Анализатор',
+    'side.sub':'Импорт, просмотр, репост.',
+    'side.workflow':'Процесс',
+    'side.review':'Обзор',
+    'side.charts':'Графики',
+    'side.tables':'Таблицы',
+    'side.our':'Наша команда',
+    'side.enemy':'Вражеская команда',
+    'side.system':'Система',
+    'side.settings':'Настройки',
+    'bpr.help':'BPR 2.0 — это рейтинг эффективности в реплее, который учитывает урон, точность, поддержку и вклад в режим боя. Он предназначен для сравнения игроков внутри анализируемой сессии.',
+    'hero.eyebrow':'BPR 2.0 · Анализ реплеев',
+    'hero.sub':'Анализируйте сессии Blitz, сравнивайте командную эффективность и получайте понятные цели после каждого блока.',
+    'hero.open':'Открыть анализатор',
+    'hero.note':'Отчёты тренировок · Индивидуальные сессии · Готово к экспорту',
+    'stats.replaysAnalyzed':'Реплеев проанализировано',
+    'stats.playersAnalyzed':'Игроков проанализировано',
+    'stats.sessions':'Сессии',
+    'stats.replays':'Реплеи',
+    'stats.ourPlayers':'Наши игроки',
+    'stats.enemyPlayers':'Игроки противника',
+    'stats.ourAvgBpr':'Наш ср. BPR',
+    'stats.enemyAvgBpr':'Ср. BPR противника',
+    'stats.avgBpr':'Ср. BPR',
+    'stats.ourBest':'Наш лучший',
+    'stats.parseErrors':'Ошибки разбора',
+    'preview.title':'Отчёт сессии',
+    'preview.ourBpr':'Наш BPR',
+    'preview.enemyBpr':'BPR противника',
+    'preview.topPerformer':'Лучший игрок',
+    'preview.damageSurvival':'Урон и выживаемость',
+    'preview.nextObjective':'Следующая цель',
+    'preview.focusCalls':'Более ранние фокус-коллы',
+    'home.scrimTitle':'Анализ тренировки',
+    'home.scrimText':'Загрузите блок реплеев и сравните свою команду с противником.',
+    'home.individualTitle':'Индивидуальные сессии',
+    'home.individualText':'Добавляйте реплеи после каждого боя и завершайте сессию с конкретными целями.',
+    'home.reportingTitle':'Чистые отчёты',
+    'home.reportingText':'Графики, рейтинги BPR, резюме и Excel-экспорт остаются в рабочей области анализатора.',
+    'demo.eyebrow':'Пример сессии',
+    'demo.title':'Полный пример отчёта тренировки',
+    'demo.sub':'Вымышленные игроки, та же структура, что и в реальном анализе.',
+    'demo.try':'Попробовать с реплеями',
+    'demo.surfaces':'Что показывает отчёт',
+    'demo.aiNote':'AI-резюме: давление уроном выше, но два ранних размена были разделены по разным целям. Следующий блок: назвать первую фокус-цель до переезда и сохранить структуру тяжёлого направления.',
+    'demo.excelNote':'Excel-экспорт хранит команды на отдельных листах. Excel-импорт может превратить сохранённый лист команды в локальную базу для дальнейшего сравнения.',
+    'upload.cardTitle':'Ввод реплеев',
+    'upload.limits':'До {files} файлов · {mb} MB всего · только .wotbreplay',
+    'upload.onlyReplay':'Принимаются только файлы .wotbreplay.',
+    'session.start':'Начать сессию',
+    'session.finish':'Завершить',
+    'session.new':'Новая сессия',
+    'session.none':'Нет активной сессии',
+    'session.recording':'Запись',
+    'session.saved':'Сохранено',
+    'session.replays':'реплеев',
+    'session.uploads':'загрузок',
+    'share.none':'Общая ссылка не создана',
+    'share.copied':'Скопировано - истекает {expires}',
+    'share.renewed':'Общий отчёт - продлён до {expires}',
+    'teamDb.none':'База команды не загружена',
+    'teamDb.loaded':'{count} игроков загружено',
+    'teamDb.loadedFrom':'{count} игроков загружено из {file}',
+    'state.processing':'Обработка реплеев...',
+    'state.ready':'Готово',
+    'state.checking':'Проверка',
+    'state.offline':'Офлайн',
+    'state.needsSetup':'Нужна настройка',
+    'state.missing':'Отсутствует',
+    'state.unavailable':'Недоступно',
+    'state.unknown':'Неизвестно',
+    'state.notFound':'Не найдено',
+    'state.backendUnreachable':'Backend недоступен',
+    'health.parser':'Парсер',
+    'health.tankDb':'База танков',
+    'health.uploadLimit':'Лимит загрузки',
+    'health.executable':'Исполняемый файл',
+    'health.tanks':'{count} танков',
+    'health.tanksLoaded':'{count} танков загружено',
+    'settings.title':'Системные настройки',
+    'settings.fileLimit':'Лимит файлов',
+    'settings.tempStorage':'Временное хранилище',
+    'settings.refresh':'Обновить систему',
+    'settings.importExcel':'Импорт Excel команды',
+    'settings.copySummary':'Копировать резюме',
+    'settings.replayFiles':'{count} файлов реплеев',
+    'settings.tempSessions':'{count} временных сессий · TTL {minutes} мин',
+    'metric.support':'Поддержка',
+    'metric.accuracy':'Точность',
+    'metric.adrEdge':'Преимущество ADR',
+    'metric.bprEdge':'Преимущество BPR',
+    'metric.focusFire':'Фокус огня',
+    'metric.survival':'Выживаемость',
+    'metric.strong':'Сильно',
+    'metric.bestPlayer':'Лучший игрок',
+    'metric.replayHealth':'Состояние реплеев',
+    'metric.ourTeamLeads':'Наша команда впереди',
+    'metric.enemyTeamLeads':'Команда противника впереди',
+    'metric.damageAdvantage':'Преимущество по давлению уроном',
+    'metric.damageDeficit':'Недостаток давления уроном',
+    'metric.parsedErrors':'{processed}/{discovered} обработано - {errors} ошибок',
+    'chart.averages':'Средние команды',
+    'chart.types':'Распределение типов танков',
+    'chart.topBpr':'Лучшие игроки по BPR',
+    'chart.summary':'Резюме сессии',
+    'empty.noSession':'Сессия не загружена',
+    'empty.loadReplays':'Загрузите реплеи, чтобы построить графики и инсайты',
+    'empty.noPlayers':'Игроки не найдены',
+    'empty.trySearch':'Попробуйте другой поиск',
+    'table.searchPlayer':'Поиск игрока...',
+    'table.columns':'Колонки',
+    'table.players':'{count} игроков',
+    'table.player':'{count} игрок',
+    'player.details':'Детали игрока',
+    'player.metrics':'Метрики сессии',
+    'player.unknownTank':'Неизвестный танк',
+    'player.battle':'бой',
+    'player.battles':'боёв',
+    'player.killsBattle':'Убийства / бой',
+    'player.penRate':'Процент пробития',
+    'errors.parseWarning':'Предупреждение: ошибка разбора',
+    'footer.credit':'PerFORmance · На основе оригинального проекта WoT Blitz Replay Analyzer от',
+    'footer.privacy':'Конфиденциальность',
+    'source.selectedFiles':'выбранных файлах',
+    'source.selectedFolder':'выбранной папке',
+    'share.title':'Поделиться ссылкой {ttl}',
+    'share.expired':'Общая ссылка истекла или недоступна',
+    'toast.noReplayFiles':'Файлы .wotbreplay не найдены в {source}',
+    'toast.importingExcel':'Импорт Excel команды...',
+    'toast.excelImportFailed':'Не удалось импортировать Excel',
+    'toast.excelImportError':'Ошибка импорта Excel',
+    'toast.playersImportedExcel':'{count} игроков импортировано из Excel',
+    'toast.uploadingReplays':'Загрузка {count} реплеев...',
+    'toast.badResponse':'Некорректный ответ',
+    'toast.networkError':'Ошибка сети',
+    'toast.addedToSession':'{count} реплеев добавлено в сессию',
+    'toast.playersLoadedFromReplays':'{players} игроков загружено из {replays} реплеев',
+    'toast.uploadError':'Ошибка загрузки',
+    'toast.sessionStarted':'Сессия начата. Загружайте каждый реплей после боя.',
+    'toast.noActiveSession':'Нет активной сессии для завершения',
+    'toast.sessionFinished':'Сессия завершена. Резюме и цели готовы.',
+    'toast.enterFolder':'Введите путь к папке',
+    'toast.serverError':'Ошибка сервера',
+    'toast.backendUnreachable':'Backend недоступен. Сервер запущен?',
+    'toast.generatingExcel':'Создание Excel...',
+    'toast.exportFailed':'Экспорт не удался',
+    'toast.excelExported':'Excel экспортирован - два листа: Наша команда + Вражеская команда',
+    'toast.exportError':'Ошибка экспорта',
+    'toast.creatingShare':'Создание общей ссылки...',
+    'toast.shareFailed':'Не удалось создать ссылку',
+    'toast.shareCopied':'Ссылка {ttl} скопирована',
+    'toast.shareError':'Ошибка ссылки',
+    'toast.loadingShared':'Загрузка общего отчёта...',
+    'toast.sharedUnavailable':'Общий отчёт недоступен',
+    'toast.sharedLoaded':'Общий отчёт загружен',
+    'toast.cannotLoadShared':'Не удалось загрузить общий отчёт',
+    'toast.noSummary':'Резюме сессии недоступно',
+    'toast.summaryCopied':'Резюме скопировано',
+    'toast.clipboardUnavailable':'Буфер обмена недоступен',
+    'summary.sessionLine':'Сессия {mode}: {replays} реплеев, {uploads} загрузок.',
+    'summary.nextTarget':'Следующая цель: держать ADR выше {adr}, сохраняя точность около {hits}% попаданий и {pens}% пробитий.',
+    'summary.objectiveSupport':'Цель: добавить больше перекрёстного огня и пользы от сбития гусениц; поддержка — самый простой рычаг роста для этого профиля.',
+    'summary.objectiveDamage':'Цель: сохранить ценность поддержки, затем увеличивать ранний урон без потери HP.',
+    'summary.teamEdge':'Преимущество команды: +{value} BPR над противником.',
+    'summary.teamGap':'Отставание команды: -{value} BPR против соперника.',
+    'summary.damageAhead':'Давление уроном выше на {value} ADR в среднем.',
+    'summary.damageBehind':'Давление уроном ниже на {value} ADR; пересмотрите стартовые размены и фокус огня.',
+    'summary.standout':'Выделился: {name}, {bpr} BPR и {adr} ADR на {tank}.',
+    'summary.objectiveStructure':'Следующая цель: сохранить структуру и сократить изолированные смерти в первую минуту.',
+    'summary.objectiveFocus':'Следующая цель: раньше задавать фокус и не распылять урон по нескольким целям.',
+    'summary.topClass':'Самый частый класс: {label}, {value} боёв записано.',
+    'summary.parseErrors':'{count} реплеев не удалось разобрать; проверьте панель ошибок перед выводами по сессии.',
+    'col._rank':'#',
+    'col.nickname':'Игрок',
+    'col.BPR':'BPR 2.0',
+    'col.battles':'Бои',
+    'col.main_tank':'Основной танк',
+    'col.HT':'ТТ',
+    'col.MT':'СТ',
+    'col.LT':'ЛТ',
+    'col.TD':'ПТ',
+    'col.ADR':'ADR',
+    'col.KPR':'KPR',
+    'col.frags':'Фраги',
+    'col.DE':'DE',
+    'col.assist':'Ассист',
+    'col.blocked':'Заблокировано',
+    'col.AccH':'Попад. %',
+    'col.AccP':'Проб. %',
+    'col.Firepower':'Огневая мощь',
+    'col.AIM':'Точность',
+    'col.Support':'Поддержка',
+    'col.Supremacy':'Превосходство',
+    'col.iPoints':'iPoints',
+    'col.sPoints':'sPoints',
+    'col.shots':'Выстрелы',
+    'col.hits':'Попадания',
+    'col.pens':'Пробития',
+    'col.account_id':'Account ID'
+  }
+};
+let currentLang = 'en';
 
 const COLS = [
   {k:'_rank',     h:'#',         vis:true,  fmt:'rank'},
@@ -1102,10 +1760,27 @@ let sortState = {
 };
 let curSection = 'overview';
 
-function metricHelp(label) {
-  return `<span class="metric-help">${label}<button class="info-dot" type="button" aria-label="What is BPR 2.0?" onclick="event.stopPropagation()">i</button><span class="info-tip">${BPR_HELP_TEXT}</span></span>`;
+function t(key, fallback='') {
+  return I18N[currentLang]?.[key] || I18N.en[key] || fallback || key;
 }
 
+function tf(key, values={}, fallback='') {
+  return t(key, fallback).replace(/\{(\w+)\}/g, (_, name) => values[name] ?? '');
+}
+
+function columnLabel(column) {
+  return t(`col.${column.k}`, column.h);
+}
+
+function metricHelp(label) {
+  return `<span class="metric-help">${label}<button class="info-dot" type="button" aria-label="What is BPR 2.0?" onclick="event.stopPropagation()">i</button><span class="info-tip">${t('bpr.help')}</span></span>`;
+}
+
+function inlineMetricHelp(key) {
+  return `${t(key)} <button class="info-dot" type="button" aria-label="What is BPR 2.0?">i</button><span class="info-tip">${t('bpr.help')}</span>`;
+}
+
+document.addEventListener('DOMContentLoaded', setupLanguage);
 document.addEventListener('DOMContentLoaded', initPageMode);
 document.addEventListener('DOMContentLoaded', refreshHealth);
 document.addEventListener('DOMContentLoaded', refreshPublicStats);
@@ -1128,7 +1803,7 @@ function setupShareExpiry() {
 function updateShareButtonTitle() {
   const btn = document.getElementById('btnSharePanel');
   if (!btn) return;
-  btn.title = `Share ${shareTtlLabel()} link`;
+  btn.title = tf('share.title', {ttl:shareTtlLabel()});
 }
 
 function shareTtlSeconds() {
@@ -1146,6 +1821,51 @@ window.addEventListener('beforeunload', e => {
   e.preventDefault();
   e.returnValue = '';
 });
+
+function setupLanguage() {
+  const stored = localStorage.getItem('blitzscrim.lang');
+  currentLang = stored && I18N[stored] ? stored : 'en';
+  const select = document.getElementById('langSelect');
+  if (select) {
+    select.value = currentLang;
+    select.addEventListener('change', () => setLanguage(select.value));
+  }
+  applyLanguage();
+}
+
+function setLanguage(lang) {
+  currentLang = I18N[lang] ? lang : 'en';
+  localStorage.setItem('blitzscrim.lang', currentLang);
+  applyLanguage();
+  if (ourData.length || enemyData.length) {
+    renderOverview();
+    renderAnalytics();
+  }
+  if (curSection === 'our') renderTable('our');
+  if (curSection === 'enemy') renderTable('enemy');
+}
+
+function applyLanguage() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.dataset.i18n, el.textContent);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder, el.placeholder);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle, el.title);
+  });
+  document.querySelectorAll('[data-i18n-help]').forEach(el => {
+    el.innerHTML = inlineMetricHelp(el.dataset.i18nHelp);
+  });
+  updateShareButtonTitle();
+  updateSessionUi();
+  if (teamDatabase.length) updateTeamDatabaseStatus();
+  else set('teamDbStatus', t('teamDb.none'));
+  if (curSection === 'our') renderTable('our');
+  if (curSection === 'enemy') renderTable('enemy');
+}
 
 function initPageMode() {
   const cleanPath = location.pathname.replace(/\/$/, '');
@@ -1165,8 +1885,8 @@ function shareIdFromPath() {
 }
 
 // â”€â”€ File input (folder upload) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-document.getElementById('fileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected files'));
-document.getElementById('folderFileInput').addEventListener('change', e => uploadReplaySelection(e, 'selected folder'));
+document.getElementById('fileInput').addEventListener('change', e => uploadReplaySelection(e, t('source.selectedFiles')));
+document.getElementById('folderFileInput').addEventListener('change', e => uploadReplaySelection(e, t('source.selectedFolder')));
 document.getElementById('excelInput').addEventListener('change', importTeamExcel);
 
 function openReplayPicker(event) {
@@ -1176,7 +1896,7 @@ function openReplayPicker(event) {
 
 async function uploadReplaySelection(e, sourceLabel) {
   const files = [...e.target.files].filter(isReplayFile);
-  if (!files.length) { toast(`No .wotbreplay files found in ${sourceLabel}`,'err'); return; }
+  if (!files.length) { toast(tf('toast.noReplayFiles', {source: sourceLabel}),'err'); return; }
   await uploadReplayFiles(files);
   e.target.value = '';
 }
@@ -1184,14 +1904,14 @@ async function uploadReplaySelection(e, sourceLabel) {
 async function importTeamExcel(e) {
   const file = e.target.files?.[0];
   if (!file) return;
-  setVeil(true, 'Importing team Excel...');
+  setVeil(true, t('toast.importingExcel'));
   const fd = new FormData();
   fd.append('file', file, file.name);
   try {
     const response = await fetch(`${API}/api/team-db/import`, {method:'POST', body:fd});
     const json = await response.json();
     if (!response.ok || json.error) {
-      toast(json.error || 'Excel import failed', 'err');
+      toast(json.error || t('toast.excelImportFailed'), 'err');
       return;
     }
     teamDatabase = json.players || [];
@@ -1201,9 +1921,9 @@ async function importTeamExcel(e) {
       players:teamDatabase
     }));
     updateTeamDatabaseStatus(file.name);
-    toast(`${teamDatabase.length} players imported from Excel`, 'ok');
+    toast(tf('toast.playersImportedExcel', {count: teamDatabase.length}), 'ok');
   } catch(err) {
-    toast('Excel import error: ' + err.message, 'err');
+    toast(t('toast.excelImportError') + ': ' + err.message, 'err');
   } finally {
     setVeil(false);
     e.target.value = '';
@@ -1225,12 +1945,14 @@ function updateTeamDatabaseStatus(fileName='') {
   const el = document.getElementById('teamDbStatus');
   if (!el) return;
   el.innerHTML = teamDatabase.length
-    ? `<strong>${teamDatabase.length}</strong> players loaded${fileName ? ` from ${esc(fileName)}` : ''}`
-    : 'No team database loaded';
+    ? (fileName
+      ? tf('teamDb.loadedFrom', {count:`<strong>${teamDatabase.length}</strong>`, file:esc(fileName)})
+      : tf('teamDb.loaded', {count:`<strong>${teamDatabase.length}</strong>`}))
+    : t('teamDb.none');
 }
 
 async function uploadReplayFiles(files) {
-  setVeil(true, `Uploading ${files.length} replays...`);
+  setVeil(true, tf('toast.uploadingReplays', {count: files.length}));
 
   const fd = new FormData();
   files.forEach(f => fd.append('files', f, f.name));
@@ -1251,9 +1973,9 @@ async function uploadReplayFiles(files) {
       xhr.onload = () => {
         fill.style.width = '100%';
         try { resolve(JSON.parse(xhr.responseText)); }
-        catch { reject(new Error('Bad response')); }
+        catch { reject(new Error(t('toast.badResponse'))); }
       };
-      xhr.onerror = () => reject(new Error('Network error'));
+      xhr.onerror = () => reject(new Error(t('toast.networkError')));
       xhr.send(fd);
     });
 
@@ -1261,14 +1983,14 @@ async function uploadReplayFiles(files) {
     if (liveSession.active) {
       addToLiveSession(json);
       applyResults(sessionResult());
-      toast(`Added ${json.processed} replay${json.processed!==1?'s':''} to session`, 'ok');
+      toast(tf('toast.addedToSession', {count: json.processed}), 'ok');
     } else {
       applyResults(json);
-      toast(`${ourData.length + enemyData.length} players loaded from ${json.processed} replays`, 'ok');
+      toast(tf('toast.playersLoadedFromReplays', {players: ourData.length + enemyData.length, replays: json.processed}), 'ok');
     }
     refreshPublicStats();
   } catch(e) {
-    toast('Upload error: ' + e.message, 'err');
+    toast(t('toast.uploadError') + ': ' + e.message, 'err');
   } finally {
     setVeil(false);
     setTimeout(() => { prog.classList.remove('show'); fill.style.width='0%'; }, 600);
@@ -1289,7 +2011,7 @@ function setupDropZone() {
   zone.addEventListener('drop', e => {
     const allFiles = [...e.dataTransfer.files];
     const replayFiles = allFiles.filter(isReplayFile);
-    if (replayFiles.length !== allFiles.length) toast('Only .wotbreplay files are accepted', 'err');
+    if (replayFiles.length !== allFiles.length) toast(t('upload.onlyReplay'), 'err');
     uploadReplayFiles(replayFiles, 'dropped files');
   });
 }
@@ -1329,12 +2051,12 @@ function startLiveSession() {
   liveSession.startedAt = new Date().toISOString();
   saveLiveSession();
   updateSessionUi();
-  toast('Session started. Upload each replay after the match.', 'ok');
+  toast(t('toast.sessionStarted'), 'ok');
 }
 
 function finishLiveSession() {
   if (!liveSession.active && !liveSession.processed) {
-    toast('No active session to finish', 'err');
+    toast(t('toast.noActiveSession'), 'err');
     return;
   }
   liveSession.active = false;
@@ -1342,7 +2064,7 @@ function finishLiveSession() {
   applyResults(sessionResult());
   switchSection('analytics');
   updateSessionUi();
-  toast('Session finished. Summary and objectives are ready.', 'ok');
+  toast(t('toast.sessionFinished'), 'ok');
 }
 
 function addToLiveSession(result) {
@@ -1426,26 +2148,26 @@ function updateSessionUi() {
   startBtn.style.display = active ? 'none' : 'inline-flex';
   finishBtn.style.display = active ? 'inline-flex' : 'none';
   finishBtn.disabled = !active;
-  startBtn.textContent = hasSaved ? 'New Session' : 'Start Session';
-  const modeLabel = analysisMode === 'scrim' ? 'Scrim' : 'Individual';
-  const status = active ? 'Recording' : (hasSaved ? 'Saved' : 'No active session');
+  startBtn.textContent = hasSaved ? t('session.new') : t('session.start');
+  const modeLabel = analysisMode === 'scrim' ? t('mode.scrim') : t('mode.individual');
+  const status = active ? t('session.recording') : (hasSaved ? t('session.saved') : t('session.none'));
   document.getElementById('sessionMeta').innerHTML = hasSaved || active
-    ? `<strong>${status}</strong> · ${modeLabel} · ${liveSession.processed || 0} replays · ${liveSession.uploads || 0} uploads`
-    : 'No active session';
+    ? `<strong>${status}</strong> · ${modeLabel} · ${liveSession.processed || 0} ${t('session.replays')} · ${liveSession.uploads || 0} ${t('session.uploads')}`
+    : t('session.none');
 }
 
 // Generate from path â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function generatePath() {
   const folder = document.getElementById('folderInput').value.trim();
-  if (!folder) { toast('Enter a folder path','err'); return; }
-  setVeil(true, 'Processing replays...');
+  if (!folder) { toast(t('toast.enterFolder'),'err'); return; }
+  setVeil(true, t('state.processing'));
   try {
     const r = await fetch(`${API}/api/process`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({folder})
     });
     const j = await r.json();
-    if (!r.ok) { toast(j.error || 'Server error','err'); return; }
+    if (!r.ok) { toast(j.error || t('toast.serverError'),'err'); return; }
     if (liveSession.active) {
       addToLiveSession(j);
       applyResults(sessionResult());
@@ -1453,9 +2175,9 @@ async function generatePath() {
       applyResults(j);
     }
     refreshPublicStats();
-    toast(`${ourData.length + enemyData.length} players loaded from ${j.processed} replays`,'ok');
+    toast(tf('toast.playersLoadedFromReplays', {players: ourData.length + enemyData.length, replays: j.processed}),'ok');
   } catch(e) {
-    toast('Cannot reach backend. Is the server running?','err');
+    toast(t('toast.backendUnreachable'),'err');
   } finally { setVeil(false); }
 }
 
@@ -1577,23 +2299,23 @@ function openPlayerModal(accountId) {
   if (!p) return;
 
   const battles = Number(p.battles) || 0;
-  set('playerModalTitle', p.nickname || 'Player details');
-  set('playerModalSub', `${p.main_tank || 'Unknown tank'} - ${battles} battle${battles === 1 ? '' : 's'}`);
+  set('playerModalTitle', p.nickname || t('player.details'));
+  set('playerModalSub', `${p.main_tank || t('player.unknownTank')} - ${battles} ${battles === 1 ? t('player.battle') : t('player.battles')}`);
 
   document.getElementById('playerKpis').innerHTML = [
     modalKpi('BPR 2.0', p.BPR),
     modalKpi('ADR', p.ADR),
     modalKpi('KPR', p.KPR),
-    modalKpi('Battles', battles)
+    modalKpi(t('col.battles'), battles)
   ].join('');
 
   document.getElementById('playerBars').innerHTML = [
     modalBar('BPR', p.BPR, 1.5),
     modalBar('ADR', p.ADR, 3500),
-    modalBar('Kills / battle', p.KPR, 3),
-    modalBar('Accuracy', p.AccH, 100, '%'),
-    modalBar('Pen rate', p.AccP, 100, '%'),
-    modalBar('Support', p.assist, Math.max(1, maxMetric('assist')))
+    modalBar(t('player.killsBattle'), p.KPR, 3),
+    modalBar(t('metric.accuracy'), p.AccH, 100, '%'),
+    modalBar(t('player.penRate'), p.AccP, 100, '%'),
+    modalBar(t('metric.support'), p.assist, Math.max(1, maxMetric('assist')))
   ].join('');
 
   document.getElementById('playerModal')?.classList.add('show');
@@ -1638,13 +2360,13 @@ function renderAnalytics() {
   const replayHealth = lastSession.discovered ? Math.round((lastSession.processed / lastSession.discovered) * 100) : 100;
 
   set('mBprEdge', signed(bprEdge));
-  set('mBprEdgeSub', bprEdge >= 0 ? 'Our team leads' : 'Enemy team leads');
+  set('mBprEdgeSub', bprEdge >= 0 ? t('metric.ourTeamLeads') : t('metric.enemyTeamLeads'));
   set('mAdrEdge', signed(adrEdge));
-  set('mAdrEdgeSub', adrEdge >= 0 ? 'Damage pressure advantage' : 'Damage pressure deficit');
+  set('mAdrEdgeSub', adrEdge >= 0 ? t('metric.damageAdvantage') : t('metric.damageDeficit'));
   set('mBestPlayer', best?.nickname || '-');
-  set('mBestPlayerSub', best ? `BPR ${best.BPR}  -  ADR ${best.ADR}` : '-');
+  set('mBestPlayerSub', best ? `BPR ${best.BPR} - ADR ${best.ADR}` : '-');
   set('mReplayHealth', `${replayHealth}%`);
-  set('mReplayHealthSub', `${lastSession.processed}/${lastSession.discovered || lastSession.processed} parsed  -  ${lastSession.errors.length} errors`);
+  set('mReplayHealthSub', tf('metric.parsedErrors', {processed:lastSession.processed, discovered:lastSession.discovered || lastSession.processed, errors:lastSession.errors.length}));
 
   drawGroupedBars('chartAverages', [
     {label:'BPR', our:ourBpr, enemy:enemyBpr},
@@ -1662,33 +2384,37 @@ function buildSessionSummary(ctx) {
   const mode = lastSession.mode || analysisMode;
   const bprDiff = ctx.ourBpr - ctx.enemyBpr;
   const adrDiff = ctx.ourAdr - ctx.enemyAdr;
-  lines.push(`${mode === 'scrim' ? 'Scrim' : 'Individual'} session: ${lastSession.processed} replay${lastSession.processed!==1?'s':''}, ${lastSession.uploads || 1} upload${(lastSession.uploads || 1)!==1?'s':''}.`);
+  lines.push(tf('summary.sessionLine', {
+    mode: mode === 'scrim' ? t('mode.scrim') : t('mode.individual'),
+    replays:lastSession.processed,
+    uploads:lastSession.uploads || 1
+  }));
 
   if (mode === 'individual') {
     const focus = bprAdrSort([...ourData])[0] || ctx.best;
     if (focus) {
       lines.push(`${focus.nickname}: ${focus.BPR} BPR, ${focus.ADR} ADR, ${focus.KPR} KPR on ${focus.main_tank}.`);
-      lines.push(`Next target: keep ADR above ${Math.ceil((Number(focus.ADR) || 0) * 1.08)} while holding accuracy near ${focus.AccH || 0}% hits and ${focus.AccP || 0}% pens.`);
+      lines.push(tf('summary.nextTarget', {adr:Math.ceil((Number(focus.ADR) || 0) * 1.08), hits:focus.AccH || 0, pens:focus.AccP || 0}));
       lines.push(Number(focus.Support) < Number(focus.Firepower)
-        ? 'Objective: add more crossfire and tracking value; support is the easiest growth lever for this profile.'
-        : 'Objective: maintain support value, then push early damage without bleeding HP first.');
+        ? t('summary.objectiveSupport')
+        : t('summary.objectiveDamage'));
     }
   } else {
     lines.push(bprDiff >= 0
-      ? `Team edge: +${bprDiff.toFixed(2)} BPR over the opponent side.`
-      : `Team gap: -${Math.abs(bprDiff).toFixed(2)} BPR against the opponent side.`);
+      ? tf('summary.teamEdge', {value:bprDiff.toFixed(2)})
+      : tf('summary.teamGap', {value:Math.abs(bprDiff).toFixed(2)}));
     lines.push(adrDiff >= 0
-      ? `Damage pressure is ahead by ${adrDiff.toFixed(0)} ADR on average.`
-      : `Damage pressure is behind by ${Math.abs(adrDiff).toFixed(0)} ADR; review opening trades and focus fire.`);
-    if (ctx.best) lines.push(`Standout: ${ctx.best.nickname}, ${ctx.best.BPR} BPR and ${ctx.best.ADR} ADR on ${ctx.best.main_tank}.`);
+      ? tf('summary.damageAhead', {value:adrDiff.toFixed(0)})
+      : tf('summary.damageBehind', {value:Math.abs(adrDiff).toFixed(0)}));
+    if (ctx.best) lines.push(tf('summary.standout', {name:ctx.best.nickname, bpr:ctx.best.BPR, adr:ctx.best.ADR, tank:ctx.best.main_tank}));
     lines.push(bprDiff >= 0
-      ? 'Next objective: keep the same structure and reduce isolated deaths in the first minute.'
-      : 'Next objective: define focus calls earlier and avoid split damage across multiple targets.');
+      ? t('summary.objectiveStructure')
+      : t('summary.objectiveFocus'));
   }
 
   const topType = topTankType([...ourData, ...enemyData]);
-  if (topType) lines.push(`Most used class: ${topType.label}, ${topType.value} recorded battles.`);
-  if (lastSession.errors.length) lines.push(`${lastSession.errors.length} replay${lastSession.errors.length!==1?'s':''} failed parsing; review the error panel before treating the session as complete.`);
+  if (topType) lines.push(tf('summary.topClass', {label:topType.label, value:topType.value}));
+  if (lastSession.errors.length) lines.push(tf('summary.parseErrors', {count:lastSession.errors.length}));
   return lines.join('\n');
 }
 
@@ -1703,7 +2429,7 @@ function drawGroupedBars(id, rows) {
     drawBar(ctx, x + barW + 5, base, barW, h * r.enemy / max, '#4B8EF5');
     label(ctx, r.label, x - 12, canvas.height - 14, '#9E9E9E', 11);
   });
-  legend(ctx, [['Our','#FF5500'],['Enemy','#4B8EF5']]);
+  legend(ctx, [[t('side.our'),'#FF5500'],[t('side.enemy'),'#4B8EF5']]);
 }
 
 function drawTypeBars(id, rows) {
@@ -1718,7 +2444,7 @@ function drawTypeBars(id, rows) {
     label(ctx, String(r.our), 64 + 180 * r.our / max, y + 13, '#9E9E9E', 11);
     label(ctx, String(r.enemy), 254 + 180 * r.enemy / max, y + 13, '#9E9E9E', 11);
   });
-  legend(ctx, [['Our','#FF5500'],['Enemy','#4B8EF5']]);
+  legend(ctx, [[t('side.our'),'#FF5500'],[t('side.enemy'),'#4B8EF5']]);
 }
 
 function drawTopBars(id, rows) {
@@ -1777,20 +2503,20 @@ function renderTable(team) {
 
   thEl.innerHTML = `<tr>${vc.map(c=>`
     <th class="${ss.k===c.k?'sorted':''}" onclick="doSort('${team}','${c.k}')">
-      ${c.k === 'BPR' ? metricHelp(c.h) : c.h}
+      ${c.k === 'BPR' ? metricHelp(columnLabel(c)) : columnLabel(c)}
     </th>`).join('')}</tr>`;
 
   if (!rows.length) {
     tbEl.innerHTML = '';
     emEl.style.display = 'block';
-    cntEl.textContent = '0 players';
+    cntEl.textContent = tf('table.players', {count:0});
     return;
   }
   emEl.style.display = 'none';
-  cntEl.textContent = `${rows.length} player${rows.length!==1?'s':''}`;
+  cntEl.textContent = tf(rows.length === 1 ? 'table.player' : 'table.players', {count:rows.length});
   tbEl.innerHTML = rows.map(p => {
     const playerId = escAttr(p.account_id || p.nickname);
-    return `<tr class="player-row" role="button" tabindex="0" data-player-id="${playerId}" onclick="openPlayerModal(this.dataset.playerId)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlayerModal(this.dataset.playerId)}">${vc.map(c=>`<td data-label="${escAttr(c.h)}" data-key="${escAttr(c.k)}">${cell(c,p,rankMap[p.account_id])}</td>`).join('')}</tr>`;
+    return `<tr class="player-row" role="button" tabindex="0" data-player-id="${playerId}" onclick="openPlayerModal(this.dataset.playerId)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPlayerModal(this.dataset.playerId)}">${vc.map(c=>`<td data-label="${escAttr(columnLabel(c))}" data-key="${escAttr(c.k)}">${cell(c,p,rankMap[p.account_id])}</td>`).join('')}</tr>`;
   }).join('');
 }
 
@@ -1832,7 +2558,7 @@ function buildDD(team) {
   const id   = team==='our' ? 'ddOurMenu' : 'ddEnemyMenu';
   document.getElementById(id).innerHTML = cols
     .filter(c=>c.k!=='_rank')
-    .map(c=>`<label class="dd-row"><input type="checkbox" ${c.vis?'checked':''} onchange="toggleCol('${team}','${c.k}',this.checked)"/>${c.h}</label>`)
+    .map(c=>`<label class="dd-row"><input type="checkbox" ${c.vis?'checked':''} onchange="toggleCol('${team}','${c.k}',this.checked)"/>${columnLabel(c)}</label>`)
     .join('');
 }
 function toggleCol(team,k,v){
@@ -1854,25 +2580,25 @@ document.addEventListener('click', e => {
 // â”€â”€ Export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function exportXlsx() {
   if (!ourData.length && !enemyData.length) return;
-  setVeil(true, 'Generating Excel...');
+  setVeil(true, t('toast.generatingExcel'));
   try {
     const r = await fetch(`${API}/api/export`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({our_team: ourData, enemy_team: enemyData})
     });
-    if (!r.ok) { toast('Export failed','err'); return; }
+    if (!r.ok) { toast(t('toast.exportFailed'),'err'); return; }
     const blob = await r.blob();
     const url  = URL.createObjectURL(blob);
     Object.assign(document.createElement('a'),{href:url,download:'results.xlsx'}).click();
     URL.revokeObjectURL(url);
-    toast('Excel exported - two sheets: Our Team + Enemy Team','ok');
-  } catch(e) { toast('Export error: '+e.message,'err'); }
+    toast(t('toast.excelExported'),'ok');
+  } catch(e) { toast(t('toast.exportError') + ': ' + e.message,'err'); }
   finally { setVeil(false); }
 }
 
 async function createShareLink() {
   if (!ourData.length && !enemyData.length) return;
-  setVeil(true, 'Creating share link...');
+  setVeil(true, t('toast.creatingShare'));
   try {
     const response = await fetch(`${API}/api/share`, {
       method:'POST',
@@ -1890,15 +2616,15 @@ async function createShareLink() {
     });
     const json = await response.json();
     if (!response.ok || json.error) {
-      toast(json.error || 'Share link failed', 'err');
+      toast(json.error || t('toast.shareFailed'), 'err');
       return;
     }
     await copyText(json.url);
     const expires = json.expires_at ? new Date(json.expires_at * 1000).toLocaleString('en') : shareTtlLabel();
-    set('shareStatus', `Copied - expires ${expires}`);
-    toast(`${shareTtlLabel(json.ttl_seconds)} link copied`, 'ok');
+    set('shareStatus', tf('share.copied', {expires}));
+    toast(tf('toast.shareCopied', {ttl:shareTtlLabel(json.ttl_seconds)}), 'ok');
   } catch(e) {
-    toast('Share error: ' + e.message, 'err');
+    toast(t('toast.shareError') + ': ' + e.message, 'err');
   } finally {
     setVeil(false);
   }
@@ -1921,40 +2647,40 @@ async function refreshHealth(showPanel=false) {
   const pill = document.getElementById('sysPill');
   const txt = document.getElementById('sysTxt');
   pill.className = 'sys-pill';
-  txt.textContent = 'Checking';
+  txt.textContent = t('state.checking');
   try {
     const response = await fetch(`${API}/api/health`);
     const health = await response.json();
     applyHealth(health, showPanel);
   } catch(e) {
     pill.className = 'sys-pill err';
-    txt.textContent = 'Offline';
+    txt.textContent = t('state.offline');
     document.getElementById('healthPanel').classList.add('show');
-    setHealthValue('hParser', 'Unavailable', false);
-    setHealthValue('hTankDb', 'Unknown', false);
+    setHealthValue('hParser', t('state.unavailable'), false);
+    setHealthValue('hTankDb', t('state.unknown'), false);
     set('hUpload', '-');
-    set('hPath', 'Backend unreachable');
+    set('hPath', t('state.backendUnreachable'));
   }
 }
 
 async function loadSharedReport() {
   const shareId = shareIdFromPath();
   if (!shareId) return;
-  setVeil(true, 'Loading shared report...');
+  setVeil(true, t('toast.loadingShared'));
   try {
     const response = await fetch(`${API}/api/share/${shareId}`);
     const json = await response.json();
     if (!response.ok || json.error) {
-      toast(json.error || 'Shared report unavailable', 'err');
-      set('shareStatus', 'Shared link expired or unavailable');
+      toast(json.error || t('toast.sharedUnavailable'), 'err');
+      set('shareStatus', t('share.expired'));
       return;
     }
     applyResults(json.report || {});
     const expires = json.expires_at ? new Date(json.expires_at * 1000).toLocaleString('en') : 'soon';
-    set('shareStatus', `Shared report - renewed until ${expires}`);
-    toast('Shared report loaded', 'ok');
+    set('shareStatus', tf('share.renewed', {expires}));
+    toast(t('toast.sharedLoaded'), 'ok');
   } catch(e) {
-    toast('Cannot load shared report', 'err');
+    toast(t('toast.cannotLoadShared'), 'err');
   } finally {
     setVeil(false);
   }
@@ -1979,21 +2705,21 @@ function applyHealth(health, showPanel=false) {
   const txt = document.getElementById('sysTxt');
   const ok = !!health.ok;
   pill.className = `sys-pill ${ok ? 'ok' : 'err'}`;
-  txt.textContent = ok ? 'Ready' : 'Needs setup';
+  txt.textContent = ok ? t('state.ready') : t('state.needsSetup');
 
-  setHealthValue('hParser', health.checks?.parser ? 'Ready' : 'Missing', health.checks?.parser);
-  setHealthValue('hTankDb', health.checks?.tank_db ? `${health.tank_count || 0} tanks` : 'Missing', health.checks?.tank_db);
+  setHealthValue('hParser', health.checks?.parser ? t('state.ready') : t('state.missing'), health.checks?.parser);
+  setHealthValue('hTankDb', health.checks?.tank_db ? tf('health.tanks', {count:health.tank_count || 0}) : t('state.missing'), health.checks?.tank_db);
   set('hUpload', `${health.max_upload_mb || 0} MB`);
-  set('hPath', health.parser || 'Not found');
-  set('uploadLimits', `Up to ${health.max_upload_files || 200} files · ${health.max_upload_mb || 0} MB total · .wotbreplay only`);
+  set('hPath', health.parser || t('state.notFound'));
+  set('uploadLimits', tf('upload.limits', {files:health.max_upload_files || 200, mb:health.max_upload_mb || 0}));
   document.querySelectorAll('.local-only').forEach(el => el.style.display = health.public_mode ? 'none' : '');
-  document.querySelector('.page-sub').textContent = 'Analyze Blitz replay sessions, compare team performance, and leave with clear objectives after every block.';
-  set('setParser', health.checks?.parser ? 'Ready' : 'Missing');
-  set('setTankDb', health.checks?.tank_db ? `${health.tank_count || 0} tanks loaded` : 'Missing');
+  document.querySelectorAll('.page-sub').forEach(el => el.textContent = t('hero.sub'));
+  set('setParser', health.checks?.parser ? t('state.ready') : t('state.missing'));
+  set('setTankDb', health.checks?.tank_db ? tf('health.tanksLoaded', {count:health.tank_count || 0}) : t('state.missing'));
   set('setUpload', `${health.max_upload_mb || 0} MB`);
-  set('setFileLimit', `${health.max_upload_files || 200} replay files`);
-  set('setStorage', `${health.max_temp_upload_dirs || 20} temp sessions · ${Math.round((health.upload_ttl_seconds || 1800) / 60)} min TTL`);
-  set('setPath', health.parser || 'Not found');
+  set('setFileLimit', tf('settings.replayFiles', {count:health.max_upload_files || 200}));
+  set('setStorage', tf('settings.tempSessions', {count:health.max_temp_upload_dirs || 20, minutes:Math.round((health.upload_ttl_seconds || 1800) / 60)}));
+  set('setPath', health.parser || t('state.notFound'));
 
   document.getElementById('healthPanel').classList.remove('show');
 }
@@ -2008,12 +2734,12 @@ function setHealthValue(id, text, ok) {
 
 async function copySessionSummary() {
   const text = document.getElementById('aiSummary')?.textContent?.trim();
-  if (!text || text === '-') { toast('No session summary available', 'err'); return; }
+  if (!text || text === '-') { toast(t('toast.noSummary'), 'err'); return; }
   try {
     await navigator.clipboard.writeText(text);
-    toast('Summary copied', 'ok');
+    toast(t('toast.summaryCopied'), 'ok');
   } catch(e) {
-    toast('Clipboard unavailable', 'err');
+    toast(t('toast.clipboardUnavailable'), 'err');
   }
 }
 
@@ -2036,7 +2762,7 @@ function clearAll() {
   document.getElementById('errPanel').classList.remove('show');
   document.getElementById('btnExportPanel').disabled=true;
   document.getElementById('btnSharePanel').disabled=true;
-  set('shareStatus', 'No shared link created');
+  set('shareStatus', t('share.none'));
   document.getElementById('clearBtn').style.display='none';
   document.getElementById('sbOurTeam').classList.add('dim');
   document.getElementById('sbEnemyTeam').classList.add('dim');
